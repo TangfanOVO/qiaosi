@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>液态玻璃 · 配方预览</title>
+<style>
+*{box-sizing:border-box}
+:root{--ink:#1f2328;--sub:#5d6670;--line:rgba(0,0,0,.1);--panel:#ffffff;--page:#e9e7e3}
+@media (prefers-color-scheme:dark){:root{--ink:#e9edf2;--sub:#9aa6b4;--line:rgba(255,255,255,.12);--panel:#1b1f26;--page:#0e1014}}
+html,body{margin:0;background:var(--page);color:var(--ink);font:14px/1.6 -apple-system,system-ui,"PingFang SC","Hiragino Sans GB",sans-serif}
+.desk{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;gap:24px;padding:24px 16px 40px}
+
+/* ── 手机 ── */
+.phone{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.phone{position:relative;width:390px;height:760px;max-width:100%;border-radius:40px;overflow:hidden;background:#111;
+  box-shadow:0 0 0 1px rgba(127,127,127,.25),0 30px 70px -30px rgba(0,0,0,.45);touch-action:none;transform:translateZ(0)}
+liquid-stage{position:absolute;inset:0;display:block}
+/* 玻璃宿主本身透明：料由着色器画。画布起不来（data-liqgl="0"）时退回 CSS 磨砂 */
+[data-glass]{color:var(--g-ink)}
+:root:not([data-liqgl="1"]) [data-glass]{background:var(--g-fallback);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4)}
+.phone{--g-ink:#fff;--g-sub:rgba(255,255,255,.78);--g-fallback:rgba(20,24,32,.42)}
+.phone:not(.light) [data-glass], .phone:not(.light) .hint-in{text-shadow:0 1px 3px rgba(0,0,0,.45)}
+.phone.light{--g-ink:#16191c;--g-sub:rgba(22,25,28,.66);--g-fallback:rgba(255,255,255,.45)}
+
+.card{position:absolute;left:20px;right:20px;top:64px;padding:20px 22px;border-radius:28px}
+.card .k{font-size:11px;letter-spacing:.18em;color:var(--g-sub)}
+.card .t{font-size:30px;font-weight:700;margin:4px 0 2px;letter-spacing:.01em}
+.card .s{font-size:13px;color:var(--g-sub)}
+.pill{position:absolute;left:20px;top:336px;height:48px;padding:0 22px;border-radius:999px;display:flex;align-items:center;gap:10px;font-weight:600}
+.bead{position:absolute;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:22px}
+.bead.a{right:20px;top:328px}
+.drop{left:calc(50% - 56px);top:536px;width:112px;height:112px;cursor:grab}
+.drop:active{cursor:grabbing}
+.hint-in{position:absolute;left:0;right:0;top:500px;text-align:center;font-size:12.5px;color:var(--g-sub);pointer-events:none}
+.bar{position:absolute;left:20px;right:20px;bottom:26px;height:64px;border-radius:999px;display:flex;align-items:center;justify-content:space-around;font-size:12.5px}
+.bar span{opacity:.75}.bar b{font-weight:600}
+
+/* ── 调节盘 ── */
+.panel{width:340px;max-width:100%;background:var(--panel);border-radius:20px;padding:18px 18px 10px;box-shadow:0 0 0 1px var(--line)}
+.panel h1{font-size:17px;margin:0 0 2px}
+.panel p{margin:0 0 12px;color:var(--sub);font-size:12.5px}
+.row{display:grid;grid-template-columns:86px 1fr 46px;align-items:center;gap:8px;margin:6px 0}
+.row label{font-size:13px}
+.row output{font-variant-numeric:tabular-nums;text-align:right;color:var(--sub);font-size:12.5px}
+input[type=range]{width:100%}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 8px}
+.btns button,.btns label{border:1px solid var(--line);background:transparent;color:inherit;font:inherit;font-size:12.5px;height:32px;padding:0 12px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center}
+.btns button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:transparent}
+.btns input[type=file]{display:none}
+.sub{font-size:12px;color:var(--sub);margin:12px 0 2px;letter-spacing:.06em}
+.meter{font-size:12px;color:var(--sub);margin:6px 0 4px;font-variant-numeric:tabular-nums}
+/* ?embed=1：嵌在仓库首页的假手机里，只留手机，配方挪到外面 */
+.embed .desk{padding:0}.embed .panel{display:none}
+.embed .phone{width:100vw;height:100vh;border-radius:0;box-shadow:none}
+@media (max-width:760px){.desk{padding:0 0 32px;gap:12px}.phone{width:100vw;height:82dvh;border-radius:0;box-shadow:none}.panel{width:auto;margin:0 16px}}
+</style>
+</head>
+<body>
+<div class="desk">
+  <div class="phone" id="phone">
+    <liquid-stage id="stage" tone="dark" light="128" bg-blur="0" tint="0.05">
+      <div class="card" data-glass data-radius="28">
+        <div class="k" data-ink>LIQUID GLASS</div>
+        <div class="t" data-ink>背后被推弯</div>
+        <div class="s" data-ink>中间跟框外一样大、一样清楚，只有边上在弯。</div>
+      </div>
+      <div class="pill" data-glass data-radius="999" data-press><span data-ink>胶囊 · 按住它</span></div>
+      <div class="bead a" data-glass data-radius="999" data-clear data-press><span data-ink>✦</span></div>
+      <div class="bead drop" data-glass data-radius="999" data-clear data-bevel="0.9" data-drag="xy" data-home data-swell="0.16" aria-label="拖动这颗水珠"></div>
+      <div class="hint-in" data-ink>把水珠拖到这些字上：字会被弯过去，松手弹回来</div>
+      <div class="bar" data-glass data-radius="999"><b data-ink>首页</b><span data-ink>聊天</span><span data-ink>记忆</span><span data-ink>设置</span></div>
+    </liquid-stage>
+  </div>
+
+  <div class="panel">
+    <h1>配方</h1>
+    <p>每拖一下都是显卡实时重算的：底图先糊好，玻璃每个像素现算折射、色散和高光。</p>
+    <div class="btns" role="group" aria-label="配方">
+      <button type="button" data-preset="old" aria-pressed="false">旧配方</button>
+      <button type="button" data-preset="new" aria-pressed="true">新配方</button>
+      <button type="button" id="bloom" aria-pressed="true">按下胀开</button>
+    </div>
+    <div class="btns" role="group" aria-label="明暗">
+      <button type="button" data-tone="dark" aria-pressed="true">黑玻璃</button>
+      <button type="button" data-tone="light" aria-pressed="false">白玻璃</button>
+      <label>换底图<input type="file" id="pick" accept="image/*"></label>
+      <button type="button" id="reset">回到默认</button>
+    </div>
+    <div id="rows"></div>
+    <div class="meter" id="meter">—</div>
+  </div>
+</div>
+
+<script src="liquid-core.js"></script>
+<script>
+(function () {
+  'use strict';
+  var stage = document.getElementById('stage'), phone = document.getElementById('phone');
+  if (/[?&]embed=1/.test(location.search)) document.documentElement.classList.add('embed');
+
+  /* 默认底图：月夜和晨雾两张山水（都是代码画的）。山脊和水纹是线条，玻璃弯没弯看得出来 */
+  var WALLS = { dark: 'wall-dark.jpg', light: 'wall-light.jpg' }, custom = false;
+  stage.setAttribute('wallpaper', WALLS.dark);
+
+  /* 调节盘：每一行就是 <liquid-stage> 上的一个属性 */
+  var P = [
+    ['bg-blur',     '背景模糊', 0, 1, 0.01, 0],
+    ['ior',         '折射率',   1.1, 1.6, 0.01, 1.44],
+    ['refract',     '弯的力度', 0, 3, 0.05, 1.75],
+    ['dispersion',  '色散',     0, 0.08, 0.002, 0.030],
+    ['thick-mul',   '厚度',     0.2, 1.5, 0.05, 1],
+    ['rim-in',      '内圈',     0, 2, 0.05, 1],
+    ['rim-out',     '外圈',     0, 2, 0.05, 0.65],
+    ['frost-rim',   '边上散射', 0, 1, 0.01, 0.55],
+    ['tint',        '料',       0, 0.4, 0.01, 0.05],
+    ['specular',    '高光',     0, 2, 0.05, 1],
+    ['light',       '光的方向', 0, 360, 1, 128],
+    ['shadow',      '接地影',   0, 2, 0.05, 1],
+    /* 新配方的几味：默认值都等于旧样子，「新配方」那颗按钮一次拨到下面 NEW 那组 */
+    ['lobes',       '两瓣边光', 0, 1, 0.05, 0, 1],
+    ['saturate',    '饱和度',   0.6, 2, 0.05, 1, 1],
+    ['lift',        '暗处提亮', 0, 0.15, 0.005, 0, 1],
+    ['disp-px',     '色散·像素', 0, 4, 0.1, 0, 1],
+    ['edge-adapt',  '边线随底色', 0, 1, 0.05, 0, 1],
+    ['phys',        '新折射',   0, 1, 1, 0, 1],
+    ['bevel',       '斜面宽度', 0.5, 2, 0.05, 1, 1],
+    ['bevel-max',   '斜面封顶', 0, 60, 1, 0, 1],
+    ['soft-corner', '圆角不折', 0, 1, 0.05, 0, 1],
+    ['frost-body',  '料里的糊', 0, 0.3, 0.01, 0.04, 1]
+  ];
+  var NEW = { lobes: 1, saturate: 1.4, lift: 0.05, 'disp-px': 2, 'edge-adapt': 1, phys: 1, refract: 2.8, bevel: 1.3, 'bevel-max': 28, 'soft-corner': 1 };
+  var rows = document.getElementById('rows');
+  P.forEach(function (p, i) {
+    if (p[6] && !(P[i - 1] || [])[6]) { var h = document.createElement('div'); h.className = 'sub'; h.textContent = '新配方的几味'; rows.appendChild(h); }
+    var r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = '<label for="p-' + p[0] + '">' + p[1] + '</label><input type="range" id="p-' + p[0] + '" min="' + p[2] + '" max="' + p[3] + '" step="' + p[4] + '" value="' + p[5] + '"><output></output>';
+    var inp = r.querySelector('input'), out = r.querySelector('output');
+    var set = function () { stage.setAttribute(p[0], inp.value); out.textContent = (+inp.value).toFixed(p[4] < 0.01 ? 3 : p[4] < 1 ? 2 : 0); };
+    inp.addEventListener('input', set); set(); p.inp = inp; p.set = set;
+    rows.appendChild(r);
+  });
+  function preset(k) {
+    P.forEach(function (p) { p.inp.value = k === 'new' && NEW[p[0]] != null ? NEW[p[0]] : p[5]; p.set(); });
+    bloom(k === 'new');
+    document.querySelectorAll('[data-preset]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-preset') === k)); });
+    cur = k;
+  }
+  function bloom(on) {
+    if (on) stage.setAttribute('press', 'bloom'); else stage.removeAttribute('press');
+    document.getElementById('bloom').setAttribute('aria-pressed', String(!!on));
+  }
+  var cur = 'new';
+  document.querySelectorAll('[data-preset]').forEach(function (b) { b.addEventListener('click', function () { preset(b.getAttribute('data-preset')); }); });
+  document.getElementById('bloom').addEventListener('click', function () { bloom(!stage.hasAttribute('press')); });
+  document.getElementById('reset').addEventListener('click', function () {
+    preset(cur); custom = false; tone('dark');
+  });
+  preset('new');
+
+  function tone(t) {
+    stage.setAttribute('tone', t);
+    if (!custom && stage.setWallpaper) stage.setWallpaper(WALLS[t]);   /* 白玻璃配浅底、黑玻璃配深底；换过自己的图就不动 */
+    phone.classList.toggle('light', t === 'light');
+    if (stage.refreshInk) stage.refreshInk();
+    document.querySelectorAll('[data-tone]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-tone') === t)); });
+  }
+  document.querySelectorAll('[data-tone]').forEach(function (b) { b.addEventListener('click', function () { tone(b.getAttribute('data-tone')); }); });
+
+  document.getElementById('pick').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0]; if (!f) return;
+    custom = true; stage.setWallpaper(URL.createObjectURL(f));
+  });
+
+  /* 给外面用（仓库首页把配方放在手机右边）：参数表、改一个值、换明暗、回默认、换底图 */
+  window.GLASS = {
+    params: P.map(function (p) { return { name: p[0], label: p[1], min: p[2], max: p[3], step: p[4], def: p[5], fresh: !!p[6] }; }),
+    preset: function (k) { if (k) preset(k); return cur; },
+    bloom: function (on) { if (on != null) bloom(on); return stage.hasAttribute('press'); },
+    get: function (n) { return +stage.getAttribute(n); },
+    set: function (n, v) { P.forEach(function (p) { if (p[0] === n) { p.inp.value = v; p.set(); } }); },
+    tone: function (t) { if (t) tone(t); return stage.getAttribute('tone'); },
+    reset: function () { document.getElementById('reset').click(); },
+    wall: function (url) { custom = true; stage.setWallpaper(url); },
+    drawn: function () { return stage._drawN || 0; }
+  };
+
+  /* 每秒真的画了几帧：画面没变时会停下来不画，一动就接着算 */
+  var meter = document.getElementById('meter'), lastD = 0;
+  setInterval(function () {
+    var on = document.documentElement.getAttribute('data-liqgl');
+    if (on === '0') { meter.textContent = '这台设备没有 WebGL2，退回了 CSS 磨砂'; return; }
+    var d = stage._drawN || 0; meter.textContent = '这一秒显卡重画了 ' + (d - lastD) + ' 帧' + (d - lastD ? '' : '（画面没变，停着省电）'); lastD = d;
+  }, 1000);
+})();
+</script>
+</body>
+</html>

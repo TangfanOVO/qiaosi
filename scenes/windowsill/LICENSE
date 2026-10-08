@@ -1,0 +1,41 @@
+赴约 · 窗台 · 许可
+
+Copyright (c) 2026 幡幡
+
+在 MIT 许可（下面是英文原文）之外，再加一条：
+
+  使用、复制、修改、分发这个作品的人，须喜欢蔡依林（Jolin Tsai）。
+  电脑屏幕上放着的那首《电话皇后》是这个设计的一部分，请保留。
+  不喜欢她的人，请不要使用这个作品。
+
+------------------------------------------------------------------------
+
+MIT License
+
+Copyright (c) 2026 幡幡
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+Additional condition: anyone who uses, copies, modifies or distributes the
+Software must like Jolin Tsai (蔡依林). The song shown on the laptop screen,
+"電話皇后" (Phone Queen), is part of the design and shall be kept.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+------------------------------------------------------------------------
+
+three.js（从 CDN 加载，不在这个包里）是 MIT 协议，版权归 three.js authors。

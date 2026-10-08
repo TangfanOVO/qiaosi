@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>赴约窗台</title>
+<style>
+/* 竖屏 2.5D：下半屏是桌面（往里的 z 方向），上半屏是墙和窗（往上的 y 方向）；窗外是海和沙滩，两边垂着柳条 */
+:root{
+  --bg:#e6e3dd; --card:#fbfaf7; --ink:#2e3236; --sub:#6c7075; --line:#d9d6d0; --accent:#a8687c;
+  --glass:rgba(251,250,247,.86);
+  --e-out:cubic-bezier(.22,.61,.36,1);
+  color-scheme:light;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;margin:0;background:var(--bg);overflow:hidden;overscroll-behavior:none}
+body{font-family:system-ui,-apple-system,"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC",sans-serif;color:var(--ink);-webkit-tap-highlight-color:transparent}
+#app{position:fixed;inset:0;overflow:hidden}
+#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#head{position:absolute;left:14px;top:calc(var(--sat) + 12px);display:flex;flex-direction:column;gap:2px;background:var(--glass);padding:7px 11px;border-radius:14px;pointer-events:none}
+#head b{font-size:15px;font-weight:700;letter-spacing:.04em}
+#head span{font-size:10.5px;letter-spacing:.14em;color:var(--sub)}
+#labs{position:absolute;inset:0;pointer-events:none;transition:opacity .35s var(--e-out)}
+#labs.off{opacity:0}
+.tag{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:center;gap:3px;will-change:transform;transition:opacity .3s var(--e-out),visibility 0s}
+.tag .p{display:flex;align-items:baseline;gap:5px;background:var(--glass);border-radius:10px;padding:3px 8px 4px;white-space:nowrap;box-shadow:0 2px 8px rgba(30,32,36,.08)}
+.tag b{font-size:12px;font-weight:700}
+.tag span{font-size:10.5px;color:var(--sub)}
+.tag i{width:5px;height:5px;border-radius:50%;background:var(--card);box-shadow:0 0 0 1.5px rgba(46,50,54,.55)}
+.tag.hide{opacity:0;visibility:hidden;transition:opacity .3s var(--e-out),visibility 0s .3s}
+.tag.ping .p{box-shadow:0 0 0 2px var(--accent),0 2px 8px rgba(30,32,36,.12)}
+#ctl{position:absolute;left:12px;right:12px;bottom:calc(var(--sab) + 14px);display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+#ctl button{min-height:40px;padding:0 14px;border:0;border-radius:20px;background:var(--glass);color:var(--ink);font:inherit;font-size:13px;cursor:pointer;box-shadow:0 2px 10px rgba(30,32,36,.08);font-variant-numeric:tabular-nums}
+#ctl button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#ctl #cView{color:var(--accent);font-weight:700}
+#wxp{order:-1;flex-basis:100%;max-width:440px;margin:0 auto;display:none;grid-template-columns:auto 1fr 2.4em auto 1fr 2.4em;align-items:center;gap:0 8px;padding:6px 14px 4px;border-radius:22px;font-size:12.5px}
+#wxp.on{display:grid}
+#ctl #wxp .tog{grid-column:1/-1;color:#fffdf9;text-shadow:inherit;box-shadow:none;justify-self:start;min-height:30px;margin:4px 0 2px;padding:0 12px;border:0;border-radius:15px;background:rgba(255,255,255,.14);font:inherit;font-size:12px;cursor:pointer}
+#ctl #wxp .tog[aria-pressed=true]{background:rgba(168,104,124,.78)}
+#wxp label{font-size:12px;letter-spacing:.04em;opacity:.92}
+#wxp label:nth-of-type(even){margin-left:12px}
+#wxp output{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-size:12px}
+#wxp input{-webkit-appearance:none;appearance:none;width:100%;min-width:0;height:34px;margin:0;background:transparent;cursor:pointer;touch-action:pan-x}
+#wxp input:focus-visible{outline:none}
+#wxp input::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:linear-gradient(to right,rgba(255,253,249,.95) var(--p,0%),rgba(255,255,255,.26) var(--p,0%));box-shadow:0 0 2px rgba(20,16,12,.45)}
+#wxp input::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-8.5px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(20,16,12,.45),0 0 0 .5px rgba(20,16,12,.2)}
+#wxp input:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 2px var(--accent),0 1px 4px rgba(20,16,12,.4)}
+#wxp input::-moz-range-track{height:3px;border-radius:2px;background:rgba(255,255,255,.26)}
+#wxp input::-moz-range-progress{height:3px;border-radius:2px;background:rgba(255,253,249,.95)}
+#wxp input::-moz-range-thumb{width:20px;height:20px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(20,16,12,.45)}
+/* 液态玻璃：这些块本身不铺底色，玻璃是在画面里算出来的（背后的东西被弯一弯、磨一磨、边上一圈亮线）；字用白字加一圈深色的晕，亮处暗处都看得清 */
+.tag .p,#head,body:not(.framed) #ctl > button,body:not(.framed) #wxp,#back,#hint{background:transparent!important;box-shadow:none!important;color:#fffdf9!important;text-shadow:0 0 1px rgba(22,18,14,.95),0 0 3px rgba(22,18,14,.65),0 1px 6px rgba(18,14,10,.45)}
+#head span{color:#f1ebe2!important}
+.tag .p{padding:4px 10px 5px}
+.tag.ping .p{box-shadow:none!important}
+.tag.ping b{color:#ffd9e4}
+body:not(.framed) #ctl #cView{color:#ffe1ea!important}
+
+#hint{position:absolute;left:50%;bottom:calc(var(--sab) + 118px);transform:translateX(-50%);white-space:nowrap;font-size:12.5px;background:var(--glass);padding:7px 13px;border-radius:999px;pointer-events:none;transition:opacity .6s var(--e-out)}
+#hint.off{opacity:0}
+#toast{position:absolute;left:50%;top:calc(var(--sat) + 66px);transform:translateX(-50%);background:rgba(46,50,54,.9);color:#fbfaf7;font-size:12.5px;padding:8px 14px;border-radius:999px;opacity:0;transition:opacity .24s var(--e-out);pointer-events:none;white-space:nowrap}
+#toast.on{opacity:1}
+#err{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--sub);font-size:14px;line-height:1.7}
+#back{position:absolute;left:12px;top:calc(var(--sat) + 10px);min-height:44px;padding:0 14px 0 10px;border:0;border-radius:22px;background:var(--glass);color:var(--ink);font:inherit;font-size:14px;display:flex;align-items:center;gap:6px;cursor:pointer;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .22s,transform .22s}
+#back.on{opacity:1;transform:none;pointer-events:auto}
+#card{position:absolute;left:12px;right:12px;bottom:calc(var(--sab) + 12px);background:transparent;border-radius:24px;padding:16px 20px 12px;color:#fffdf9;text-shadow:0 0 1px rgba(22,18,14,.95),0 0 3px rgba(22,18,14,.7),0 1px 6px rgba(18,14,10,.5);transform:translateY(calc(100% + var(--sab) + 40px));visibility:hidden;transition:transform .24s cubic-bezier(.4,0,1,1),visibility 0s .24s}
+#card.on{transform:none;visibility:visible;transition:transform .5s cubic-bezier(.34,1.2,.64,1),visibility 0s}
+#card .lab{font-size:10.5px;letter-spacing:.17em;color:#f6f1ea}
+#card h2{margin:4px 0 2px;font-size:24px;font-weight:800;letter-spacing:.01em}
+#card p{margin:0}
+#k-sub{font-size:13px;color:#f3eee6}
+#k-note{font-size:14px;line-height:1.7;margin-top:8px!important}
+#card .go{margin-top:10px;min-height:44px;width:100%;border:0;border-top:1px solid rgba(255,255,255,.22);background:none;font:inherit;font-size:13.5px;color:#fffdf9;text-shadow:inherit;display:flex;align-items:center;justify-content:space-between;padding:0;cursor:pointer}
+body.focused #ctl,body.focused #head{opacity:0;pointer-events:none}
+#ctl,#head{transition:opacity .25s}
+body.framed.focused #side #ctl{opacity:.35}
+@media (prefers-reduced-motion:reduce){#labs,.tag,#hint,#toast,#card,#card.on,#back{transition:none}}
+/* 电脑上预览：画面按 iPhone 17 Pro Max（440 × 956）画，整只“手机”等比放进窗口，按钮挪到手机外面 */
+#island,#homebar,#side{display:none}
+body.framed{background:#d9d6d0}
+body.framed #app{inset:auto;left:0;top:0;width:440px;height:956px;transform-origin:0 0;border-radius:58px;
+  box-shadow:0 0 0 11px #1b1a19,0 0 0 12.5px #4a4745,0 40px 90px rgba(40,30,20,.28);--sat:62px;--sab:30px}
+body.framed #island{display:block;position:absolute;left:50%;top:11px;width:124px;height:36px;margin-left:-62px;border-radius:18px;background:#0c0c0c;z-index:20;pointer-events:none}
+body.framed #homebar{display:block;position:absolute;left:50%;bottom:8px;width:144px;height:5px;margin-left:-72px;border-radius:3px;background:rgba(40,34,30,.45);z-index:20;pointer-events:none}
+body.framed #side{display:flex;position:fixed;flex-direction:column;gap:12px;width:320px}
+body.framed #hint{bottom:calc(var(--sab) + 26px)}
+#side #ctl{position:static;justify-content:flex-start}
+#side #ctl button{background:var(--card)}
+body.framed #cWx{display:none}
+body.framed #wxp{display:grid;grid-template-columns:auto 1fr 3.2em;gap:0 12px;max-width:none;margin:0;padding:8px 18px;background:var(--card);box-shadow:0 2px 10px rgba(30,32,36,.08);color:var(--ink);font-size:13px}
+body.framed #wxp label{margin-left:0;color:var(--sub);opacity:1}
+body.framed #ctl #wxp .tog{color:var(--sub);background:rgba(46,50,54,.07);text-shadow:none}
+body.framed #ctl #wxp .tog[aria-pressed=true]{background:var(--accent);color:#fff}
+body.framed #wxp input::-webkit-slider-runnable-track{background:linear-gradient(to right,var(--accent) var(--p,0%),rgba(46,50,54,.15) var(--p,0%));box-shadow:none}
+body.framed #wxp input::-webkit-slider-thumb{box-shadow:0 1px 4px rgba(30,32,36,.28),0 0 0 .5px rgba(30,32,36,.18)}
+body.framed #wxp input::-moz-range-track{background:rgba(46,50,54,.15)}
+body.framed #wxp input::-moz-range-progress{background:var(--accent)}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <canvas id="c" aria-label="赴约窗台：一张桌子靠着窗，窗外是海，两边垂着柳条"></canvas>
+  <div id="labs"></div>
+  <div id="head"><b>赴约 · 窗台</b><span>草稿 · 演示数据</span></div>
+  <div id="hint">左右拖转椅子 · 点东西凑近看 · 上滑看窗外</div>
+  <div id="ctl" role="group" aria-label="草稿调节">
+    <button id="cView" type="button">抬头看窗外 ↑</button>
+    <div id="wxp" role="group" aria-label="季节和天气">
+      <button id="cAuto" class="tog" type="button" aria-pressed="true">天色跟着现在的时间</button>
+      <label for="sSeason">季节</label><input id="sSeason" type="range" min="0" max="3" step="1" value="0"><output for="sSeason"></output>
+      <label for="sTod">天色</label><input id="sTod" type="range" min="0" max="2" step="1" value="0"><output for="sTod"></output>
+      <label for="sWind">风</label><input id="sWind" type="range" min="0" max="100" step="1" value="25"><output for="sWind"></output>
+      <label for="sRain">雨</label><input id="sRain" type="range" min="0" max="100" step="1" value="0"><output for="sRain"></output>
+      <label for="sSnow">雪</label><input id="sSnow" type="range" min="0" max="100" step="1" value="0"><output for="sSnow"></output>
+      <label for="sThun">雷</label><input id="sThun" type="range" min="0" max="100" step="1" value="0"><output for="sThun"></output>
+    </div>
+    <button id="cWx" type="button" aria-expanded="false" aria-controls="wxp">季节 · 天气</button>
+    <button id="cLab" type="button" aria-pressed="true">标注 开</button>
+  </div>
+  <button id="back" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>退回</button>
+  <section id="card" aria-live="polite">
+    <span class="lab" id="k-lab"></span>
+    <h2 id="k-title"></h2>
+    <p id="k-sub"></p>
+    <p id="k-note"></p>
+    <button class="go" id="k-go" type="button"><span id="k-go-t"></span><span aria-hidden="true">›</span></button>
+  </section>
+  <div id="toast" role="status"></div>
+  <div id="err">这台设备打不开 WebGL，画面出不来。</div>
+  <div id="island"></div><div id="homebar"></div>
+</div>
+<aside id="side" aria-label="季节和天气"></aside>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
+</script>
+<script type="module">
+/*@@SCRIPT@@*/</script>
+</body>
+</html>

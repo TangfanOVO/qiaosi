@@ -1,0 +1,131 @@
+<!doctype html>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>健康 · 参考前端 · demo</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="health.css">
+<style>
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.7 system-ui,-apple-system,"PingFang SC","Hiragino Sans GB",sans-serif}
+  .wrap{max-width:440px;margin:0 auto;min-height:100vh;background:var(--bg);padding:0 16px 40px}
+  .eyebrow{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--hint);margin:22px 0 3px}
+  h2{font-size:21px;font-weight:700;margin:0 0 3px;letter-spacing:.01em}
+  .lede{font-size:13px;color:var(--sub);margin:2px 0 16px}
+  .packs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+  .packs button{min-height:36px;padding:0 14px;border-radius:11px;background:var(--card);
+    border:1px solid var(--line);color:var(--sub);font:inherit;font-size:13px;cursor:pointer}
+  .packs button.on{border-color:var(--maple);color:var(--maple);background:var(--maple-soft);font-weight:600}
+  /* ── 套液态玻璃（「玻璃」那颗按钮）：health.css 不动，只在这里覆盖变量、让掉卡片自己的底 ── */
+  .glassbed{position:fixed;inset:0;z-index:0}
+  :root[data-skin="liquid"] body{background:#0f141b}
+  :root[data-skin="liquid"] .wrap{position:relative;z-index:1;background:transparent}
+  :root[data-skin="liquid"]{
+    --bg:transparent; --card:rgba(12,17,24,.38); --card2:rgba(12,17,24,.24);
+    --ink:#fff; --sub:rgba(255,255,255,.76); --hint:rgba(255,255,255,.56); --line:rgba(255,255,255,.14);
+    --accent:rgba(255,255,255,.86); --accent-soft:rgba(255,255,255,.14); --thread:rgba(255,255,255,.22)}
+  /* 白玻璃（白天）：玻璃模式下点「亮 / 暗」切过来，底图换晨雾那张，字变深色 */
+  :root[data-skin="liquid"][data-glasstone="light"] body{background:#eef0f3}
+  :root[data-skin="liquid"][data-glasstone="light"]{
+    --card:rgba(255,255,255,.34); --card2:rgba(255,255,255,.20);
+    --ink:#16191c; --sub:rgba(22,25,28,.72); --hint:rgba(22,25,28,.52); --line:rgba(22,25,28,.12);
+    --accent:rgba(26,30,36,.70); --accent-soft:rgba(22,25,28,.09); --thread:rgba(22,25,28,.18)}
+  :root[data-skin="liquid"][data-liqgl="1"] [data-glass]{background:none!important;box-shadow:none!important}
+  :root[data-skin="liquid"]:not([data-glasstone="light"]) .hl{text-shadow:0 1px 2px rgba(0,0,0,.35)}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">health</div>
+  <h2>健康</h2>
+  <p class="lede">一页看完今天；点上面四个大数里任意一个，进趋势页（曲线能点，也能按住滑）。<br>
+    <b>这一页的数全是编的</b> —— 步数、睡眠、心率、心情、周期都是脚本用固定种子现生成的，
+    不对应任何真人。这块只画，不接任何数据源。</p>
+  <div class="packs">
+    <button data-demo="full" class="on">有数据</button>
+    <button data-demo="empty">空的</button>
+    <button data-theme-flip>亮 / 暗</button>
+    <button data-glass-flip>玻璃</button>
+  </div>
+  <div id="health"></div>
+</div>
+
+<script src="demo-data.js"></script>
+<script src="health.js"></script>
+<script>
+  var host = document.getElementById('health');
+  function mount(kind) {
+    var src = kind === 'empty' ? HEALTH_DEMO.empty : HEALTH_DEMO;
+    HealthPage(host, {
+      series: src.series,
+      now: src.now,
+      bio: HEALTH_DEMO.bio,
+      birthday: HEALTH_DEMO.birthday,
+      onSaveBio: function () { return true; }      /* demo 里只记在这一页，不存到哪儿去 */
+    });
+  }
+  mount('full');
+  document.querySelectorAll('[data-demo]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('[data-demo]').forEach(function (x) { x.classList.toggle('on', x === b); });
+      mount(b.getAttribute('data-demo'));
+    });
+  });
+  document.querySelector('[data-theme-flip]').addEventListener('click', function () {
+    var R = document.documentElement;
+    var dark = R.dataset.theme ? R.dataset.theme === 'dark'
+                               : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    R.dataset.theme = dark ? 'light' : 'dark';
+    if (window.__glassTone) window.__glassTone();   /* 开着玻璃的话，跟着换黑玻璃 / 白玻璃 */
+  });
+
+  /* 套液态玻璃：借隔壁 ../liquid-glass/liquid-core.js，在页面底下铺一块画布，把卡片标成 data-glass。
+     卡片是 health.js 用 innerHTML 画的，重画以后要再标一次。 */
+  (function () {
+    var btn = document.querySelector('[data-glass-flip]'), R = document.documentElement, stage = null, bed = null, mo = null;
+    var CARDS = '.hl-page .h4 .c, .hl-page .hb, .hl-trend .dcard, .hl-trend .infobox, .hl-bar button';
+    function mark() { host.querySelectorAll(CARDS).forEach(function (el) { if (!el.hasAttribute('data-glass')) { el.setAttribute('data-glass', ''); el.setAttribute('data-radius', '16'); } }); }
+    function load(cb) {
+      if (window.customElements && customElements.get('liquid-stage')) return cb(true);
+      var sc = document.createElement('script'); sc.src = '../liquid-glass/liquid-core.js';
+      sc.onload = function () { cb(true); }; sc.onerror = function () { cb(false); };
+      document.head.appendChild(sc);
+    }
+    function on() {
+      load(function (ok) {
+        if (!ok) { btn.textContent = '玻璃（要旁边的 liquid-glass 文件夹）'; return; }
+        /* 画布自己会写死 position:relative，所以外面套一层固定定位的壳 */
+        bed = document.createElement('div'); bed.className = 'glassbed';
+        stage = document.createElement('liquid-stage');
+        stage.setAttribute('hosts', '[data-glass]');
+        tone(true);
+        /* 液态玻璃的新配方（见 ../liquid-glass/README.md「新配方的几味」） */
+        [['lobes', '1'], ['saturate', '1.4'], ['lift', '0.05'], ['disp-px', '2'], ['edge-adapt', '1'], ['phys', '1'], ['refract', '2.8'], ['bevel', '1.3'], ['bevel-max', '28'], ['soft-corner', '1']]
+          .forEach(function (a) { stage.setAttribute(a[0], a[1]); });
+        mark();   /* 先标卡片再铺画布：画布挂上去那一刻数一遍宿主，之后只在有新节点时再数 */
+        bed.appendChild(stage); document.body.insertBefore(bed, document.body.firstChild);
+        R.dataset.skin = 'liquid';
+        mo = new MutationObserver(mark); mo.observe(host, { childList: true, subtree: true });
+        btn.classList.add('on');
+      });
+    }
+    /* 黑玻璃 / 白玻璃跟着「亮 / 暗」走：没切过就是黑玻璃 */
+    function tone(first) {
+      if (!stage) return;
+      var t = R.dataset.theme === 'light' ? 'light' : 'dark';
+      if (first && !R.dataset.theme) { R.dataset.theme = 'dark'; t = 'dark'; }
+      R.dataset.glasstone = t;
+      stage.setAttribute('tone', t);
+      stage.setAttribute('tint', t === 'light' ? '0.10' : '0.18');
+      var w = '../liquid-glass/wall-' + t + '.jpg';
+      if (first || !stage.setWallpaper) stage.setAttribute('wallpaper', w); else stage.setWallpaper(w);
+    }
+    window.__glassTone = function () { tone(false); };
+    function off() {
+      if (mo) mo.disconnect(); if (bed) bed.remove(); stage = bed = null; delete R.dataset.glasstone;
+      host.querySelectorAll('[data-glass]').forEach(function (el) { el.removeAttribute('data-glass'); el.removeAttribute('data-radius'); });
+      delete R.dataset.skin; R.removeAttribute('data-liqgl'); btn.classList.remove('on');
+    }
+    btn.addEventListener('click', function () { R.dataset.skin === 'liquid' ? off() : on(); });
+    if (/[?&]glass=1/.test(location.search)) on();
+  })();
+</script>

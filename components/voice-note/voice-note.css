@@ -1,0 +1,247 @@
+/* ══ 语音条（voice-note.css）══
+   跟 voice-note.js 一对。
+
+   皮：不自己分皮。颜色全吃页面上按 data-skin / data-theme 算好的那组 token
+   （--bg --card --card2 --ink --sub --hint --line --accent --accent-soft --shadow --shadow-lift，demo.html 里有一份可以照抄），
+   所以纸、夜色（纸＋暗）自动对，换成你自己的 token 也跟着走；玻璃皮（data-skin="liquid"）只多给几味 --vn-*。
+   动效只动 transform / opacity / filter，曲线就是下面那几条。 */
+
+.vn, .vn-demo{
+  --e-out:cubic-bezier(.22,.61,.36,1);
+  --e-in:cubic-bezier(.4,0,1,1);
+  --spring-soft:cubic-bezier(.34,1.26,.64,1);
+  --spring-pop:cubic-bezier(.34,1.56,.64,1);
+
+  /* ── 纸那一族（默认）：一个气泡，圆钮和波形在一条里 ── */
+  --vn-tsh:none;
+  --vn-fill:var(--card); --vn-edge:var(--shadow); --vn-glass:none;
+  --vn-r:15px; --vn-tail:5px;
+  --vn-bar:color-mix(in srgb, var(--hint) 40%, transparent); --vn-bar-on:var(--accent);
+  --vn-menu:var(--card); --vn-menu-glass:none; --vn-menu-r:13px;
+  --vn-menu-edge:var(--shadow-lift); --vn-menu-hover:var(--card2);
+  --vn-tog-on:var(--accent-soft); --vn-tog-on-ink:var(--accent);
+  --vn-stroke:1.9;
+}
+
+/* ── 玻璃皮 · 黑 ── */
+:root[data-skin="liquid"] .vn, :root[data-skin="liquid"] .vn-demo{
+  --vn-tsh:0 1px 2px rgba(0,0,0,.42);
+  --vn-fill:rgba(14,19,26,.30); --vn-edge:inset 0 1px 0 rgba(255,255,255,.16);
+  --vn-glass:blur(5px) saturate(1.2); --vn-r:20px; --vn-tail:20px;
+  --vn-bar:rgba(255,255,255,.34); --vn-bar-on:rgba(255,255,255,.94);
+  --vn-menu:rgba(16,21,29,.50); --vn-menu-glass:blur(22px) saturate(1.5); --vn-menu-r:24px;
+  --vn-menu-edge:inset 0 1px 0 rgba(255,255,255,.22), inset 0 -1px 0 rgba(0,0,0,.25), 0 22px 44px -16px rgba(0,0,0,.6);
+  --vn-menu-hover:rgba(255,255,255,.09);
+  --vn-tog-on:rgba(255,255,255,.16); --vn-tog-on-ink:#ffffff;
+  --vn-stroke:1.55;
+}
+/* ── 玻璃皮 · 白（W 档）── */
+:root[data-skin="liquid"][data-glasstone="light"] .vn, :root[data-skin="liquid"][data-glasstone="light"] .vn-demo{
+  --vn-tsh:none;
+  --vn-fill:rgba(255,255,255,.30); --vn-edge:inset 0 1px 0 rgba(255,255,255,.85);
+  --vn-bar:rgba(22,25,28,.18); --vn-bar-on:rgba(22,25,28,.58);
+  --vn-menu:rgba(248,249,251,.62);
+  --vn-menu-edge:inset 0 1px 0 #ffffff, inset 0 -1px 0 rgba(22,25,28,.08), 0 22px 44px -18px rgba(60,64,70,.4);
+  --vn-menu-hover:rgba(22,25,28,.06);
+  --vn-tog-on:rgba(255,255,255,.74); --vn-tog-on-ink:#16191c;
+}
+
+/* hidden 必须真藏：下面好几块自己写了 display:flex，会压过浏览器默认的 [hidden]{display:none} */
+.vn [hidden], .vn-demo [hidden]{display:none!important}
+
+/* 塞进现成的文字气泡 .msg 里时（给那层加 .vnmsg）：外面那层气泡让位，料由语音条自己给 */
+.msg.vnmsg{background:none!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+  padding:0!important;border-radius:0!important;width:100%!important;max-width:none!important;white-space:normal!important}
+
+/* ══════════════════ 气泡 ══════════════════ */
+.vn{position:relative;display:block;color:var(--ink);font-size:14.5px;line-height:1.6;
+  -webkit-tap-highlight-color:transparent}
+.vn.menuon{z-index:40}
+.vn-card{position:relative;width:fit-content;max-width:100%}
+.vn-card.open{width:82%}
+.vn.menuon .vn-card{z-index:2}
+
+/* 播放条。纸那一族：一个气泡，圆钮和波形在一条里，长按整块陷、整块浮。
+   玻璃皮：一颗珠子 ＋ 一条胶囊，DOM 这边全透明，两块玻璃都由 liquid-core 的着色器画；
+   长按只推波形那条，珠子和下面的字原地不动。 */
+.vn-row{display:flex;align-items:center;gap:10px;width:fit-content;box-sizing:border-box;
+  padding:6px 14px 6px 6px;background:var(--vn-fill);box-shadow:var(--vn-edge);
+  -webkit-backdrop-filter:var(--vn-glass);backdrop-filter:var(--vn-glass);
+  border-radius:var(--vn-r);border-bottom-left-radius:var(--vn-tail);text-shadow:var(--vn-tsh);
+  transform-origin:20% 50%}
+.vn-bead{flex:none;width:34px;height:34px;border-radius:50%;border:0;padding:0;margin:0;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;background:var(--accent-soft);color:var(--accent);
+  transition:transform .28s var(--spring-pop)}
+.vn-bead:active{transform:scale(.92)}
+.vn-bead:focus-visible, .vn-cap:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.vn-bead svg{width:14px;height:14px;fill:currentColor;stroke:currentColor;stroke-width:1.5;stroke-linejoin:round}
+.vn-cap{display:flex;align-items:center;gap:12px;border:0;padding:0;margin:0;background:transparent;
+  color:inherit;font:inherit;text-shadow:inherit;cursor:pointer;-webkit-user-select:none;user-select:none;
+  touch-action:manipulation;-webkit-touch-callout:none}
+
+:root[data-skin="liquid"] .vn-row{gap:6px;padding:0;background:transparent;box-shadow:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none;border-radius:0}
+:root[data-skin="liquid"] .vn-bead{width:44px;height:44px;background:transparent;color:var(--ink);transition:none}
+:root[data-skin="liquid"] .vn-bead:active{transform:none}               /* 按下由着色器的 data-press 给，不叠第二份 */
+:root[data-skin="liquid"] .vn-bead svg{width:16px;height:16px}
+:root[data-skin="liquid"] .vn-cap{height:44px;border-radius:22px;padding:0 17px 0 16px;transform-origin:24% 50%}
+:root[data-skin="liquid"] .vn-text{background:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;border-radius:20px}
+/* 画布还没画上（或起不来）时，先给一层 CSS 料垫着 —— 降级必须有底 */
+:root[data-skin="liquid"]:not([data-liqgl="1"]) :is(.vn-bead, .vn-cap, .vn-text){
+  background:var(--vn-fill);box-shadow:var(--vn-edge);-webkit-backdrop-filter:var(--vn-glass);backdrop-filter:var(--vn-glass)}
+
+/* 波形：静止的形状＝这条语音每一段有多响（有音频就从音频算一次）。
+   播放时不跳，只有一道进度从左往右扫过去 —— 亮的那层跟暗的那层是同一排条，靠一对反向平移裁出来 */
+.vn-wave{position:relative;flex:none;height:30px}
+:root[data-skin="liquid"] .vn-wave{height:28px}
+.vn-bars{display:flex;align-items:center;gap:2.5px;height:100%}
+.vn-bar{flex:none;display:block;width:3px;height:100%;border-radius:3px;background:var(--vn-bar);transform-origin:50% 50%}
+.vn-bars.on .vn-bar{background:var(--vn-bar-on)}
+.vn-lit{position:absolute;inset:0;overflow:hidden;transform:translateX(-100%);pointer-events:none}   /* 平移到左边去的那层不能挡住珠子 */
+.vn-lit > .vn-bars{transform:translateX(100%)}
+.vn-dur{flex:none;min-width:28px;text-align:right;font-size:13px;color:var(--sub);
+  font-variant-numeric:tabular-nums;letter-spacing:.02em}
+
+/* 字：默认没有，长按里开了「原文」「中文」才在下面长出来。语气提示（「」里的）一律不显示 */
+.vn-text{margin-top:6px;padding:11px 14px 12px;display:flex;flex-direction:column;gap:9px;
+  background:var(--vn-fill);box-shadow:var(--vn-edge);
+  -webkit-backdrop-filter:var(--vn-glass);backdrop-filter:var(--vn-glass);
+  border-radius:var(--vn-r);border-top-left-radius:6px;text-shadow:var(--vn-tsh)}
+.vn-tx{margin:0;font-size:14.5px;line-height:1.62;color:var(--ink);word-break:break-word;
+  -webkit-user-select:text;user-select:text;text-wrap:pretty}
+.vn-tx.zh2{font-size:13.5px;line-height:1.72;color:var(--sub)}
+.vn-w{transition:opacity .3s var(--e-out)}
+.vn-tx .next{opacity:.4}
+
+/* ── 浮起来：别的东西退到后面 —— 是糊，不是压一层黑 ──
+   作用域（scope）是这条语音所在的那个列表；这条以外的每一块各自糊一点、淡一点。
+   玻璃皮的地面由画布自己糊（bg-blur 一路推上去）。 */
+.vn-focusing > *, .vn-blurtoo{transition:filter .24s var(--e-in), opacity .24s var(--e-in)}
+.vn-focus > :not(.vn-keep), .vn-focus-on .vn-blurtoo{filter:blur(4.5px);opacity:.58;
+  transition:filter .34s var(--e-out), opacity .34s var(--e-out)}
+
+.vn-cap2{position:absolute;left:50px;bottom:calc(100% + 12px);z-index:3;display:flex;align-items:center;gap:2px;padding:4px;
+  border-radius:999px;background:var(--vn-menu);box-shadow:var(--vn-menu-edge);
+  -webkit-backdrop-filter:var(--vn-menu-glass);backdrop-filter:var(--vn-menu-glass);text-shadow:var(--vn-tsh);
+  transform-origin:24px 100%;animation:vnRise .38s var(--spring-pop) .03s both}
+.vn-cap2.out{animation:vnSink .18s var(--e-in) both}
+@keyframes vnRise{from{opacity:0;transform:translateY(10px) scale(.84)}to{opacity:1;transform:none}}
+@keyframes vnSink{from{opacity:1;transform:none}to{opacity:0;transform:translateY(6px) scale(.92)}}
+.vn-cb{position:relative;isolation:isolate;display:flex;align-items:center;gap:6px;height:42px;padding:0 15px;
+  border:0;border-radius:999px;background:transparent;color:var(--sub);font:inherit;font-size:13.5px;
+  cursor:pointer;text-shadow:inherit;white-space:nowrap;box-sizing:border-box;
+  transition:transform .28s var(--spring-pop)}
+.vn-cb:active{transform:scale(.94)}
+.vn-cb::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;
+  background:var(--vn-tog-on);opacity:0;transform:scale(.8);
+  transition:opacity .2s var(--e-out), transform .34s var(--spring-pop)}
+.vn-cb.on{color:var(--vn-tog-on-ink);font-weight:600}
+.vn-cb.on::before{opacity:1;transform:none}
+.vn-cb svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.vn-cb:focus-visible, .vn-mi:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+.vn-capsep{width:1px;height:20px;background:var(--line);margin:0 3px;flex:none}
+
+.vn-menu{position:absolute;left:50px;top:calc(100% + 12px);z-index:3;width:206px;box-sizing:border-box;padding:6px;
+  background:var(--vn-menu);box-shadow:var(--vn-menu-edge);border-radius:var(--vn-menu-r);
+  -webkit-backdrop-filter:var(--vn-menu-glass);backdrop-filter:var(--vn-menu-glass);
+  text-shadow:var(--vn-tsh);transform-origin:24px 0;animation:vnDrop .36s var(--spring-soft) .05s both}
+.vn-menu.out{animation:vnUp .18s var(--e-in) both}
+@keyframes vnDrop{from{opacity:0;transform:translateY(-8px) scale(.88)}to{opacity:1;transform:none}}
+@keyframes vnUp{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-4px) scale(.94)}}
+.vn-mi{display:flex;align-items:center;gap:9px;width:100%;border:0;background:transparent;color:var(--ink);
+  font:inherit;font-size:13.5px;padding:9px 11px;border-radius:calc(var(--vn-menu-r) - 7px);cursor:pointer;text-align:left;text-shadow:inherit}
+.vn-mi:hover{background:var(--vn-menu-hover)}
+.vn-mi svg{width:16px;height:16px;stroke:var(--sub);stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* 聊天记录（按天翻）那一版：播放条照旧，字平铺在下面、不套气泡 */
+.vn.flat .vn-card.open{width:100%}
+.vn.flat .vn-text{margin-top:0;padding:10px 0 2px;gap:7px;background:none;box-shadow:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none;border-radius:0}
+.vn.flat .vn-tx{font-size:13.5px;line-height:1.65}
+.vn.flat .vn-tx.zh2{font-size:13px;line-height:1.7}
+
+/* ══════════════════ 演示（全屏）══════════════════
+   长按菜单里点「演示」进来。一个点和线连成的图形 + 一行字幕。
+   给录屏用：控件两三秒后自己退下去，点一下回来。 */
+.vn-demo{position:fixed;inset:0;--leaf:360px;z-index:var(--vn-demo-z,9000);visibility:hidden;opacity:0;transform:scale(.965);
+  font-family:-apple-system,"SF Pro Text","PingFang SC","Hiragino Sans GB",system-ui,sans-serif;
+  color:var(--ink);background:var(--bg);-webkit-user-select:none;user-select:none;
+  transition:opacity .24s var(--e-in), transform .28s var(--e-in), visibility 0s linear .28s}
+.vn-demo.on{visibility:visible;opacity:1;transform:none;
+  transition:opacity .3s var(--e-out), transform .5s var(--spring-soft), visibility 0s}
+.vn-demo > liquid-stage{position:absolute;inset:0;display:block;overflow:hidden;isolation:isolate;width:100%;height:100%}
+.vn-demo.flat > liquid-stage > canvas{display:none!important}           /* 纸那一族：就是一张纸，不铺壁纸不画玻璃 */
+.vn-dm-ui{position:absolute;inset:0;z-index:1;text-shadow:var(--vn-tsh);
+  padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+.vn-dm-in{position:relative;height:100%;max-width:460px;margin:0 auto}
+
+.vn-dm-top{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:12px;padding:14px 16px}
+.vn-dm-close{width:40px;height:40px;flex:none;border-radius:50%;border:0;padding:0;background:transparent;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .5s var(--e-out), opacity .35s var(--e-out)}
+.vn-dm-close svg{width:20px;height:20px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.vn-dm-close:focus-visible,.vn-dm-play:focus-visible,.vn-dm-seg button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.vn-demo.idle .vn-dm-close{transform:translateY(-80px);opacity:0;pointer-events:none}
+.vn-dm-title{flex:1;text-align:center;line-height:1.25}
+.vn-dm-title b{display:block;font-size:15px;font-weight:600;letter-spacing:.04em}
+.vn-dm-title i{display:block;font-style:normal;font-size:11.5px;color:var(--hint);margin-top:3px;letter-spacing:.05em;font-variant-numeric:tabular-nums}
+.vn-dm-sp{width:40px;flex:none}
+
+/* 中间那一块：图形在上、字幕在下，一起在顶栏和控件之间居中。矮屏上图形自己缩（画布是 360 的逻辑尺寸，CSS 缩放） */
+.vn-dm-mid{position:absolute;left:0;right:0;top:64px;bottom:196px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.vn-dm-leaf{position:relative;flex:none;width:var(--leaf,360px);height:var(--leaf,360px);pointer-events:none;
+  transition:transform .7s var(--spring-soft)}
+.vn-demo.subs-off .vn-dm-leaf{transform:translateY(80px)}
+.vn-dm-leaf canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* 图形底下垫一团很软的暗（白玻璃是亮）：不是玻璃也不是描边，只是让细线从壁纸里浮出来 */
+.vn-dm-leaf::before{content:"";position:absolute;inset:-30px;border-radius:50%;
+  background:radial-gradient(closest-side,var(--dm-halo) 0%,var(--dm-halo2) 58%,transparent 100%)}
+.vn-demo.tone-dark{--dm-halo:rgba(5,8,14,.46);--dm-halo2:rgba(5,8,14,.20)}
+.vn-demo.tone-light{--dm-halo:rgba(250,251,253,.50);--dm-halo2:rgba(250,251,253,.22)}
+.vn-demo.flat .vn-dm-leaf::before{display:none}
+
+/* 字幕：细体，跟图形的细点细线一个分量。一次只给一句；句子里是逐字渐显的流式，不是一个词一个词蹦 */
+.vn-dm-subs{position:relative;flex:none;align-self:stretch;margin:-10px 26px 0;height:160px;pointer-events:none;transition:opacity .3s;
+  -webkit-font-smoothing:antialiased}
+.vn-demo.subs-off .vn-dm-subs{opacity:0}
+.vn-dm-line{position:absolute;left:0;right:0;top:0;text-align:center;opacity:0;transform:translateY(16px);
+  transition:opacity .5s var(--e-out), transform .65s var(--e-out)}
+.vn-dm-line.now{opacity:1;transform:none}
+.vn-dm-line.past{opacity:0;transform:translateY(-16px)}
+.vn-dm-en{margin:0;font-size:16px;line-height:1.62;font-weight:300;letter-spacing:.012em;text-wrap:balance}
+.vn-dm-zh{margin:8px 0 0;font-size:13px;line-height:1.75;font-weight:300;letter-spacing:.04em;color:var(--sub);text-wrap:balance}
+.vn-dm-zh.solo{margin:0;font-size:15.5px;color:var(--ink)}
+
+.vn-dm-ctl{position:absolute;left:0;right:0;bottom:0;padding:0 28px 22px;display:flex;flex-direction:column;align-items:center;gap:14px;
+  transition:transform .55s var(--e-out), opacity .45s var(--e-out)}
+.vn-demo.idle .vn-dm-ctl{transform:translateY(200px);opacity:0;pointer-events:none}   /* 玻璃宿主跟着滑出去，着色器就不再画它 */
+.vn-dm-prog{align-self:stretch;display:flex;align-items:center;gap:12px;font-size:11.5px;color:var(--sub);font-variant-numeric:tabular-nums}
+.vn-dm-track{flex:1;height:3px;border-radius:3px;background:var(--line);overflow:hidden}
+.vn-dm-track i{display:block;height:100%;background:var(--ink);opacity:.85;transform-origin:0 50%;transform:scaleX(0)}
+.vn-dm-play{width:62px;height:62px;border-radius:50%;border:0;padding:0;background:transparent;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;cursor:pointer}
+.vn-dm-play svg{width:22px;height:22px;fill:currentColor}
+.vn-dm-seg{position:relative;align-self:stretch;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:4px;
+  border-radius:999px;box-shadow:inset 0 0 0 1px var(--line)}
+.vn-dm-segglass{position:absolute;left:4px;top:4px;bottom:4px;width:calc((100% - 8px) / 4);border-radius:999px;
+  transition:transform .55s var(--spring-pop)}                       /* 选中＝那颗玻璃滑到哪 */
+.vn-dm-seg button{position:relative;z-index:1;height:40px;border:0;background:transparent;border-radius:999px;cursor:pointer;
+  color:var(--sub);font:inherit;font-size:13px;text-shadow:inherit;transition:color .25s}
+.vn-dm-seg button.on{color:var(--ink);font-weight:600}
+.vn-dm-hair{position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--line);opacity:0;transition:opacity .6s}
+.vn-demo.idle .vn-dm-hair{opacity:1}
+.vn-dm-hair i{display:block;height:100%;background:var(--ink);opacity:.6;transform-origin:0 50%;transform:scaleX(0)}
+/* 玻璃皮、画布没起来时的底 */
+:root[data-skin="liquid"]:not([data-liqgl="1"]) .vn-demo [data-vn-glass]{background:var(--vn-fill);box-shadow:var(--vn-edge)}
+/* 纸那一族：按钮就是纸皮肤自己的卡片，进度用重点色 */
+.vn-demo.flat .vn-dm-close:hover{background:var(--card2)}
+.vn-demo.flat .vn-dm-play{background:var(--card);box-shadow:var(--shadow);color:var(--accent)}
+.vn-demo.flat .vn-dm-play:active{transform:scale(.96)}
+.vn-demo.flat .vn-dm-track i{background:var(--accent);opacity:1}
+.vn-demo.flat .vn-dm-hair i{background:var(--accent);opacity:.8}
+.vn-demo.flat .vn-dm-seg{background:var(--card2);box-shadow:none}
+.vn-demo.flat .vn-dm-segglass{background:var(--card);box-shadow:var(--shadow)}
+
+@media (prefers-reduced-motion:reduce){
+  .vn-bead, .vn-cb, .vn-cb::before, .vn-dm-leaf, .vn-dm-line, .vn-dm-segglass, .vn-demo, .vn-demo.on{transition:none}
+  .vn-cap2, .vn-menu{animation:none}
+}

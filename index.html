@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>巧思 · qiaosi</title>
+<meta name="description" content="一些拿来就能用的前端小东西：3D 窗台书桌、语音条、健康页、液态玻璃。">
+<style>
+:root{--bg:#f1eee8;--card:#fffdf9;--ink:#2e2a26;--sub:#776f68;--hint:#9a918a;--line:rgba(46,42,38,.1);--on:#2e2a26;--on-ink:#f8f5f0}
+@media (prefers-color-scheme:dark){:root{--bg:#111318;--card:#1a1d24;--ink:#e9ecf1;--sub:#9aa3b0;--hint:#727b88;--line:rgba(255,255,255,.1);--on:#e9ecf1;--on-ink:#14161b}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 -apple-system,system-ui,"PingFang SC","Hiragino Sans GB",sans-serif}
+a{color:inherit}
+.top{max-width:980px;margin:0 auto;padding:28px 20px 6px}
+.top h1{margin:0;font-size:24px;letter-spacing:.02em}
+.top p{margin:2px 0 0;color:var(--sub);font-size:14px}
+.top .jolin{margin:4px 0 6px;color:var(--ink);font-size:14px;font-weight:600;letter-spacing:.04em}
+.tabs{max-width:980px;margin:14px auto 0;padding:0 20px;display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:transparent;color:var(--sub);font:inherit;font-size:14px;height:36px;padding:0 16px;border-radius:999px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--on);color:var(--on-ink);border-color:transparent;font-weight:600}
+.stage{max-width:980px;margin:18px auto 40px;padding:0 20px;display:flex;gap:28px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
+.phone{width:390px;height:800px;max-width:100%;border-radius:44px;padding:10px;background:#0c0d10;
+  box-shadow:0 0 0 1px rgba(127,127,127,.2),0 40px 80px -40px rgba(0,0,0,.5);flex:none}
+.phone iframe{display:block;width:100%;height:100%;border:0;border-radius:34px;background:#000}
+.info{width:340px;max-width:100%;background:var(--card);border-radius:22px;padding:22px 22px 18px;box-shadow:0 0 0 1px var(--line)}
+.info .k{font-size:11px;letter-spacing:.18em;color:var(--hint);text-transform:uppercase}
+.info h2{margin:2px 0 6px;font-size:20px}
+.info p{margin:0 0 12px;color:var(--sub);font-size:14px}
+.info dl{margin:0 0 14px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px}
+.info dt{color:var(--hint)}.info dd{margin:0}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.row a,.row button{display:inline-flex;align-items:center;height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);
+  background:transparent;color:var(--ink);font:inherit;font-size:13.5px;text-decoration:none;cursor:pointer}
+.row a.main{background:var(--on);color:var(--on-ink);border-color:transparent}
+.glass{display:flex;align-items:center;justify-content:space-between;margin:0 0 14px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--ink) 5%,transparent);font-size:13.5px}
+.glass[hidden]{display:none}
+.sw{position:relative;width:44px;height:26px;border-radius:999px;border:0;background:color-mix(in srgb,var(--ink) 22%,transparent);cursor:pointer;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .25s cubic-bezier(.34,1.26,.64,1)}
+.sw[aria-checked="true"]{background:#34c759}.sw[aria-checked="true"]::after{transform:translateX(18px)}
+.ctl[hidden]{display:none}
+.ctl{margin:0 0 14px}
+.ctl .seg{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.ctl .seg button,.ctl .seg label{border:1px solid var(--line);background:transparent;color:inherit;font:inherit;font-size:12.5px;height:30px;padding:0 11px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center}
+.ctl .seg button[aria-pressed="true"]{background:var(--on);color:var(--on-ink);border-color:transparent}
+.ctl .seg input[type=file]{display:none}
+.ctl .r{display:grid;grid-template-columns:70px 1fr 42px;align-items:center;gap:8px;margin:3px 0;font-size:12.5px}
+.ctl .r output{text-align:right;color:var(--sub);font-variant-numeric:tabular-nums}
+.ctl .r input{width:100%;accent-color:var(--on)}
+.ctl .h{font-size:11.5px;color:var(--hint);margin:10px 0 2px;letter-spacing:.06em}
+.ctl .m{font-size:12px;color:var(--hint);margin-top:6px;font-variant-numeric:tabular-nums}
+.foot{max-width:980px;margin:0 auto 40px;padding:0 20px;color:var(--hint);font-size:12.5px;text-align:center}
+@media (max-width:760px){
+  .top{padding:18px 16px 0}.tabs{padding:0 16px}.stage{padding:0 16px;gap:16px;margin-top:12px}
+  .phone{width:100%;height:78dvh;border-radius:30px;padding:6px}.phone iframe{border-radius:25px}
+  .info{width:100%}
+}
+@media (prefers-reduced-motion:reduce){.sw,.sw::after{transition:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>巧思 · qiaosi</h1>
+  <p class="jolin">讨厌蔡依林不能拿。</p>
+  <p>一些拿来就能用的前端小东西。点上面换一块，在手机里直接玩；喜欢哪块，就拿走那一个文件夹。</p>
+</header>
+<nav class="tabs" role="tablist" aria-label="分区"></nav>
+<main class="stage">
+  <div class="phone"><iframe id="view" title="演示" allow="fullscreen"></iframe></div>
+  <section class="info" aria-live="polite">
+    <div class="k" id="i-k"></div>
+    <h2 id="i-t"></h2>
+    <p id="i-p"></p>
+    <div class="glass" id="i-g" hidden>
+      <span>套上液态玻璃<br><small style="color:var(--hint)">实时计算的，手机会多费一点电</small></span>
+      <button type="button" class="sw" role="switch" aria-checked="false" aria-label="套上液态玻璃" id="sw"></button>
+    </div>
+    <div class="ctl" id="i-v" hidden>
+      <div class="h">皮肤</div><div class="seg" id="v-skin"></div>
+      <div class="h">演示里的图形（按住波形 → 演示）</div><div class="seg" id="v-shape"></div>
+    </div>
+    <div class="ctl" id="i-c" hidden>
+      <div class="seg">
+        <button type="button" data-preset="old" aria-pressed="false">旧配方</button>
+        <button type="button" data-preset="new" aria-pressed="true">新配方</button>
+        <button type="button" id="c-bloom" aria-pressed="true">按下胀开</button>
+      </div>
+      <div class="seg">
+        <button type="button" data-tone="dark" aria-pressed="true">黑玻璃</button>
+        <button type="button" data-tone="light" aria-pressed="false">白玻璃</button>
+        <label>换底图<input type="file" accept="image/*" id="c-pick"></label>
+        <button type="button" id="c-reset">回到默认</button>
+      </div>
+      <div id="c-rows"></div>
+      <div class="m" id="c-m"></div>
+    </div>
+    <dl id="i-d"></dl>
+    <div class="row">
+      <a class="main" id="i-take" target="_blank" rel="noopener">拿走这一块</a>
+      <a id="i-open" target="_blank" rel="noopener">单独打开</a>
+    </div>
+  </section>
+</main>
+<p class="foot">纯前端，演示里的字和数都是编的。<a href="https://github.com/TangfanOVO/qiaosi">GitHub</a></p>
+
+<script>
+(function () {
+  'use strict';
+  var REPO = 'https://github.com/TangfanOVO/qiaosi/tree/main/';
+  var ITEMS = [
+    { id: 'windowsill', tab: '窗台', k: 'scene · three.js', path: 'scenes/windowsill', page: 'index.html',
+      p: '一张靠窗的 3D 书桌。窗外是海和沙滩，柳条跟着风摆；天色跟着时间走，有风雨雪雷和四季。左右拖着看，点桌上的东西镜头推过去。全部用代码画，没有图片素材。',
+      d: [['依赖', 'three.js（CDN）'], ['协议', 'MIT']] },
+    { id: 'voice', tab: '语音条', k: 'component', path: 'components/voice-note', page: 'demo.html', ctl: 'voice',
+      p: '聊天里的语音消息。点着播放；按住波形那条，它浮起来出菜单，「原文 / 中文」往下展开；点「演示」进全屏，图形跟着声音流动。',
+      d: [['依赖', '没有（玻璃皮要 liquid-core.js）'], ['皮肤', '纸 / 夜色 / 玻璃黑 / 玻璃白'], ['协议', 'MIT']] },
+    { id: 'health', tab: '健康', k: 'page', path: 'components/health', page: 'demo.html', glass: true,
+      p: '一页看完今天：四个大数、心情 24 小时、最近 14 天的走势。点任意一个大数进趋势页，曲线能点也能按住滑。只画，不接数据源。',
+      d: [['依赖', '没有'], ['数据', '演示里是固定种子编的 90 天'], ['协议', 'MIT']] },
+    { id: 'glass', tab: '液态玻璃', k: 'plugin · WebGL2', path: 'components/liquid-glass', page: 'demo.html',
+      p: '把标了 data-glass 的元素画成液态玻璃：背后的东西在边上被推弯，拖着会拉长，松手会弹回。一排滑杆就是配方，每拖一下都是显卡现算的。',
+      d: [['依赖', '没有，一个文件'], ['注意', '实时计算，画面一直在动的页面会一直算'], ['协议', 'MIT']], ctl: 'glass' }
+  ];
+  var tabs = document.querySelector('.tabs'), view = document.getElementById('view'), sw = document.getElementById('sw');
+  var cur = null, glassOn = false;
+  ITEMS.forEach(function (it) {
+    var b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'tab'); b.textContent = it.tab; b.dataset.id = it.id;
+    b.addEventListener('click', function () { show(it.id, true); }); tabs.appendChild(b); it.btn = b;
+  });
+  function src(it, embed) { return it.path + '/' + it.page + (it.glass && glassOn ? '?glass=1' : embed && it.ctl ? '?embed=1' : ''); }
+  function show(id, push) {
+    var it = ITEMS.filter(function (x) { return x.id === id; })[0] || ITEMS[0]; cur = it;
+    ITEMS.forEach(function (x) { x.btn.setAttribute('aria-selected', String(x === it)); });
+    document.getElementById('i-k').textContent = it.k;
+    document.getElementById('i-t').textContent = it.tab;
+    document.getElementById('i-p').textContent = it.p;
+    document.getElementById('i-d').innerHTML = it.d.map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>'; }).join('');
+    document.getElementById('i-g').hidden = !it.glass;
+    document.getElementById('i-take').href = REPO + it.path;
+    document.getElementById('i-open').href = src(it);
+    document.getElementById('i-c').hidden = it.ctl !== 'glass';
+    document.getElementById('i-v').hidden = it.ctl !== 'voice';
+    view.src = src(it, true);
+    if (push) try { history.replaceState(null, '', '#' + it.id); } catch (e) {}
+  }
+  sw.addEventListener('click', function () {
+    glassOn = !glassOn; sw.setAttribute('aria-checked', String(glassOn));
+    if (cur && cur.glass) { view.src = src(cur); document.getElementById('i-open').href = src(cur); }
+  });
+
+  /* 液态玻璃那一格：配方的滑杆放在手机右边，直接调手机里那块画布（同一个站点，读得到它的 GLASS） */
+  var meterT = 0, lastD = 0;
+  function G() { try { return view.contentWindow && view.contentWindow.GLASS; } catch (e) { return null; } }
+  function toneBtns(t) { document.querySelectorAll('#i-c [data-tone]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-tone') === t)); }); }
+  function buildCtl() {
+    var g = G(), rows = document.getElementById('c-rows'); rows.innerHTML = '';
+    if (!g) return;
+    g.params.forEach(function (p, i) {
+      if (p.fresh && !(g.params[i - 1] || {}).fresh) { var h = document.createElement('div'); h.className = 'h'; h.textContent = '新配方的几味'; rows.appendChild(h); }
+      var r = document.createElement('div'); r.className = 'r';
+      r.innerHTML = '<label for="c-' + p.name + '">' + p.label + '</label><input type="range" id="c-' + p.name + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '"><output></output>';
+      var inp = r.querySelector('input'), out = r.querySelector('output');
+      var show = function () { out.textContent = (+inp.value).toFixed(p.step < 0.01 ? 3 : p.step < 1 ? 2 : 0); };
+      inp.value = g.get(p.name); show();
+      inp.addEventListener('input', function () { var gg = G(); if (gg) gg.set(p.name, inp.value); show(); });
+      p.inp = inp; p.show = show; rows.appendChild(r);
+    });
+    toneBtns(g.tone());
+    var pr = g.preset();
+    document.querySelectorAll('#i-c [data-preset]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-preset') === pr)); });
+    document.getElementById('c-bloom').setAttribute('aria-pressed', String(g.bloom()));
+  }
+  /* 语音条那一格：皮肤和演示图形放在手机外面 */
+  function buildVoice() {
+    var V; try { V = view.contentWindow.VOICE; } catch (e) {}
+    if (!V) return;
+    [['v-skin', V.skins, V.skin], ['v-shape', V.shapes, V.shape]].forEach(function (g) {
+      var box = document.getElementById(g[0]), now = g[2]();
+      box.innerHTML = '';
+      g[1].forEach(function (o) {
+        var b = document.createElement('button'); b.type = 'button'; b.textContent = o[1];
+        b.setAttribute('aria-pressed', String(o[0] === now));
+        b.addEventListener('click', function () { g[2](o[0]); box.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); }); });
+        box.appendChild(b);
+      });
+    });
+  }
+  view.addEventListener('load', function () {
+    clearInterval(meterT);
+    if (cur && cur.ctl === 'voice') { buildVoice(); return; }
+    if (!cur || cur.ctl !== 'glass') return;
+    buildCtl(); lastD = 0;
+    meterT = setInterval(function () {
+      var g = G(); if (!g) return; var d = g.drawn();
+      document.getElementById('c-m').textContent = '这一秒显卡重画了 ' + (d - lastD) + ' 帧' + (d - lastD ? '' : '（画面没变，停着省电）'); lastD = d;
+    }, 1000);
+  });
+  document.querySelectorAll('#i-c [data-tone]').forEach(function (b) {
+    b.addEventListener('click', function () { var g = G(); if (g) { g.tone(b.getAttribute('data-tone')); toneBtns(g.tone()); } });
+  });
+  document.querySelectorAll('#i-c [data-preset]').forEach(function (b) {
+    b.addEventListener('click', function () { var g = G(); if (g) { g.preset(b.getAttribute('data-preset')); buildCtl(); } });
+  });
+  document.getElementById('c-bloom').addEventListener('click', function () { var g = G(); if (g) { g.bloom(!g.bloom()); buildCtl(); } });
+  document.getElementById('c-reset').addEventListener('click', function () { var g = G(); if (g) { g.reset(); buildCtl(); } });
+  document.getElementById('c-pick').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0], g = G(); if (f && g) g.wall(URL.createObjectURL(f));
+  });
+  show((location.hash || '').slice(1), false);
+})();
+</script>
+</body>
+</html>

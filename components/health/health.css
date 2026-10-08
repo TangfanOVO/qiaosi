@@ -1,0 +1,252 @@
+/* 健康 —— 参考前端（只画，不接数据源）
+   ════════════════════════════════════════════════════════════════
+   两层：主页（.hl-page）一眼看完今天；点四个大数里任意一个进趋势页（.hl-trend）。
+   只用底座 tokens.css 的变量，不写死颜色 —— 亮色暗色、换重点色都自动跟上。
+   前缀：外壳 .hl，两层 .hl-page / .hl-trend；动画名一律 hl- 打头，别跟宿主撞。
+   ★ 动画只动 transform / opacity / stroke-dashoffset。两处破例写在旁边：
+     区间条那块底片是平移（还是 transform），基本信息展开用的是 max-height。
+   ════════════════════════════════════════════════════════════════ */
+
+@keyframes hl-draw {from{stroke-dashoffset:var(--len)} to{stroke-dashoffset:0}}
+@keyframes hl-clock{from{stroke-dashoffset:var(--circ)} to{stroke-dashoffset:var(--off)}}
+@keyframes hl-sweep{from{transform:scaleX(0)} to{transform:scaleX(var(--p,1))}}
+@keyframes hl-grow {from{transform:scaleY(0)} to{transform:scaleY(1)}}
+@keyframes hl-rise {from{transform:translateY(10px);opacity:0} to{transform:none;opacity:1}}
+@keyframes hl-pop  {from{transform:scale(0)} 60%{transform:scale(1.14)} to{transform:scale(1)}}
+@keyframes hl-halo {from{transform:scale(.35);opacity:.55} to{transform:scale(2.6);opacity:0}}
+@keyframes hl-fade {from{opacity:0} to{opacity:1}}
+@media (prefers-reduced-motion:reduce){
+  .hl *{animation-duration:.01ms !important;animation-delay:0s !important;transition-duration:.01ms !important}
+}
+
+/* ── 外壳 ── */
+.hl{position:relative}
+.hl-trend[hidden]{display:none}
+/* 进趋势页时，主页不用 display:none 收起来 —— 那样回来时所有 CSS 动画会从头再播一遍
+   （线重新画、数重新弹），看着像重新加载。改成原地藏着：还在渲染树里，动画不重播。 */
+.hl-page.hl-off{position:absolute;left:0;right:0;top:0;height:0;overflow:hidden;
+  visibility:hidden;pointer-events:none}
+.hl .dnone{font-size:13px;color:var(--sub);margin:12px 2px;line-height:1.6}
+.hl-bar{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.hl-bar b{font-size:16px;font-weight:700;color:var(--ink)}
+.hl-bar button{width:40px;height:40px;border:0;border-radius:12px;background:var(--card);
+  box-shadow:var(--shadow);color:var(--ink);display:grid;place-items:center;cursor:pointer;
+  transition:transform .28s var(--spring-pop)}
+.hl-bar button:active{transform:scale(.94)}
+.hl-bar button svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+
+/* ── 今天四个大数（点哪个都进趋势页）── */
+.hl-page .h4{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.hl-page .h4 .c{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:13px 14px 12px;
+  cursor:pointer;transition:transform .28s var(--spring-pop)}
+.hl-page .h4 .c:active{transform:scale(.97)}
+.hl-page .h4 .k{display:flex;align-items:center;justify-content:space-between;gap:6px;
+  font-size:10.5px;letter-spacing:.14em;color:var(--sub)}
+.hl-page .h4 .n{display:flex;align-items:baseline;gap:4px;margin-top:5px}
+.hl-page .h4 .n b{font-size:27px;font-weight:800;letter-spacing:-.04em;
+  font-variant-numeric:tabular-nums;line-height:1.05;color:var(--ink)}
+.hl-page .h4 .n i{font-style:normal;font-size:12px;color:var(--sub)}
+.hl-page .h4 .t{height:4px;background:var(--line);border-radius:2px;margin-top:8px;overflow:hidden}
+.hl-page .h4 .t s{display:block;height:100%;border-radius:2px;background:var(--maple);
+  transform-origin:left center;animation:hl-sweep .42s var(--e-out) both}
+
+/* ── 一块卡片的通用壳 ── */
+.hl-page .hb{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);
+  padding:16px 16px 15px;margin-bottom:12px;color:var(--ink)}
+.hl-page .hb .eyebrow{font-size:10.5px;letter-spacing:.17em;color:var(--sub)}
+.hl-page .hb .big{font-size:44px;font-weight:800;letter-spacing:-.05em;
+  font-variant-numeric:tabular-nums;line-height:1.02}
+.hl-page .hb .u{font-size:14px;color:var(--ink);font-weight:600;margin-top:-1px}
+
+/* ── 心情 24 小时 ── */
+.hl-page .tide svg{display:block;width:100%;height:auto;overflow:visible;touch-action:pan-y}
+.hl-page .tide .ln{fill:none;stroke:var(--maple);stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+/* ★ 淡色走 fill-opacity，不走 opacity：面积块有一段淡入（hl-fade 管 opacity 0→1），
+   两者要是写在同一个属性上，动画最后一帧会把 .10 盖成 1，整片变实心 */
+.hl-page .tide .ar{fill:var(--maple);fill-opacity:.10}
+.hl-page .tide .zero{stroke:var(--line);stroke-width:1}
+.hl-page .tide .slp{fill:var(--thread,#ddd2c6);opacity:.30}
+.hl-page .tide .halo{fill:none;stroke:var(--maple);stroke-width:1.4;transform-box:fill-box;
+  transform-origin:center;animation:hl-halo .58s var(--e-out) both}
+.hl-page .tide .pt{fill:var(--maple);transform-box:fill-box;transform-origin:center}
+.hl-page .tide .hit{fill:transparent;cursor:pointer}
+.hl-page .hours{position:relative;height:13px;margin-top:1px}
+.hl-page .hours span{position:absolute;top:0;font-size:9.5px;color:var(--hint);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.hl-page .tags{display:flex;gap:15px;white-space:nowrap;overflow-x:auto;
+  overscroll-behavior-x:contain;scrollbar-width:none;
+  margin:12px -16px 0;padding:11px 16px 0;border-top:1px solid var(--line)}
+.hl-page .tags::-webkit-scrollbar{display:none}
+.hl-page .tags button{background:none;border:0;padding:0;font:inherit;font-size:13px;
+  color:var(--sub);cursor:pointer;white-space:nowrap}
+/* ★ 选中态只走颜色＋下划线，字重一动不动 —— 加粗会撑宽，六个词就挤不下一行 */
+.hl-page .tags button.on{color:var(--maple);text-decoration:underline;text-underline-offset:4px}
+.hl-page .tags button i{font-style:normal;color:var(--hint);font-size:11px;margin-left:3px}
+
+/* ── 最近几天那三条小线 ── */
+.hl-page .mini{display:flex;flex-direction:column;gap:15px}
+.hl-page .mini .r{cursor:pointer}
+.hl-page .mini .hd{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px}
+.hl-page .mini .hd b{font-size:12.5px;font-weight:600}
+.hl-page .mini .hd s{text-decoration:none;font-size:14px;font-weight:700;
+  font-variant-numeric:tabular-nums}
+.hl-page .mini .hd s i{font-style:normal;font-size:10.5px;color:var(--hint);
+  margin-left:2px;font-weight:400}
+.hl-page .mini svg{display:block;width:100%;height:auto;overflow:visible}
+.hl-page .mini .ln{fill:none;stroke:var(--maple);stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round}
+.hl-page .mini .ar{fill:var(--maple);fill-opacity:.08}
+.hl-page .mini .tp{fill:var(--maple)}
+
+/* ── 睡眠：一天一根竖条，从躺下画到起床 ── */
+.hl-page .beds svg{display:block;width:100%;height:auto;overflow:visible}
+.hl-page .beds .slpbar{fill:var(--maple);opacity:.75;transform-box:fill-box;transform-origin:top center;
+  animation:hl-grow .5s var(--spring-soft) both}
+.hl-page .beds .slpbar.today{opacity:1}
+.hl-page .beds .avg{stroke:var(--maple);stroke-width:1;stroke-dasharray:2 3;opacity:.6}
+.hl-page .beds .gl{stroke:var(--line);stroke-width:1}
+.hl-page .beds .lbl{fill:var(--hint);font-size:7.5px;font-family:inherit}
+
+/* ── 此刻那几行 ── */
+.hl-page .nowrow{display:flex;align-items:baseline;gap:9px;padding:9px 0;
+  border-bottom:1px solid var(--line);animation:hl-rise .38s var(--e-out) both}
+.hl-page .nowrow:last-child{border-bottom:0}
+.hl-page .nowrow b{font-size:19px;font-weight:800;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums;min-width:52px}
+.hl-page .nowrow span{font-size:12.5px;color:var(--sub);line-height:1.5}
+.hl-page .nowrow em{font-style:normal;color:var(--hint);font-size:11.5px;margin-left:auto;flex:none}
+
+/* ── 周期 ── */
+.hl-page .cyc{display:flex;align-items:center;gap:13px}
+.hl-page .cyc svg{flex:none}
+.hl-page .cyc .ring{fill:none;stroke:var(--line);stroke-width:4}
+.hl-page .cyc .arc{fill:none;stroke:var(--maple);stroke-width:4;stroke-linecap:round;
+  animation:hl-clock .9s var(--e-out) .1s both}
+.hl-page .cstat{display:flex;gap:8px;margin:11px 0 2px}
+.hl-page .cstat div{flex:1;background:var(--card2,#faf7f1);border-radius:11px;padding:8px 10px}
+.hl-page .cstat s{display:block;text-decoration:none;font-size:10px;letter-spacing:.14em;color:var(--hint)}
+.hl-page .cstat b{display:block;font-size:18px;font-weight:800;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums;animation:hl-rise .4s var(--e-out) both}
+
+/* ══ 趋势页 ══ */
+.hl-trend{color:var(--ink)}
+/* 区间条：一块底片在平移，不是四格各自换底色 */
+.hl-trend .hrange{position:relative;margin:0 0 12px;padding:3px;
+  background:var(--card2,#faf7f1);border-radius:12px}
+.hl-trend .hrange .pill{position:absolute;top:3px;bottom:3px;left:3px;
+  width:calc((100% - 6px) / 4);background:var(--card);border-radius:9px;
+  box-shadow:var(--shadow);pointer-events:none;
+  transition:transform .34s var(--spring-soft)}
+.hl-trend .hrange .rr{position:relative;display:flex}
+.hl-trend .hrange button{flex:1;border:0;background:transparent;font-family:inherit;
+  font-size:12.5px;font-weight:500;padding:8px 0;min-height:38px;cursor:pointer;
+  color:var(--sub);transition:color .22s var(--e-out)}
+.hl-trend .hrange button.on{color:var(--ink);font-weight:700}
+
+.hl-trend .dcard{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);
+  padding:15px 16px 14px;margin-bottom:11px}
+.hl-trend .dcard .hd{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.hl-trend .dcard .hd b{font-size:15px;font-weight:700}
+.hl-trend .dcard .rd{display:flex;align-items:baseline;gap:6px;margin:3px 0 0}
+.hl-trend .dcard .rd b{font-size:34px;font-weight:800;letter-spacing:-.05em;
+  font-variant-numeric:tabular-nums;line-height:1.08}
+.hl-trend .dcard .rd i{font-style:normal;font-size:13px;color:var(--sub);font-weight:600}
+.hl-trend .dcard .rd em{font-style:normal;font-size:12px;color:var(--hint);margin-left:2px;
+  font-variant-numeric:tabular-nums}
+.hl-trend .dcard svg{display:block;width:100%;height:auto;touch-action:pan-y}
+.hl-trend .dcard .ln{fill:none;stroke:var(--maple);stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
+.hl-trend .dcard .ar{fill:var(--maple-soft,#f2e3dc)}
+.hl-trend .dcard .base, .hl-trend .dcard .zl{stroke:var(--line);stroke-width:1}
+.hl-trend .dcard .pt{fill:var(--maple)}
+.hl-trend .dcard .hit{fill:transparent;cursor:pointer}
+/* ★ 选中的那个红点和虚线是平移过去的，不是每步重建重弹 ——
+   过渡放在包着它们的 <g> 上，圆点自己的 hl-pop 只在第一次出现时跑一次。 */
+.hl-trend .dcard .gd{stroke:var(--maple);stroke-width:1;stroke-dasharray:2 3}
+.hl-trend .dcard .gdwrap,
+.hl-trend .dcard .selwrap{transition:transform .16s var(--e-out)}
+.hl-trend .xax{position:relative;height:13px}
+.hl-trend .xax span{position:absolute;font-size:9px;letter-spacing:.4px;color:var(--hint);
+  white-space:nowrap;font-variant-numeric:tabular-nums;line-height:13px}
+.hl-trend .st3{display:flex;gap:7px;margin-top:9px}
+.hl-trend .st3 div{flex:1;min-width:0;overflow:hidden;background:var(--card2,#faf7f1);border-radius:11px;padding:8px 10px}
+.hl-trend .st3 s{display:block;text-decoration:none;font-size:10px;letter-spacing:.14em;color:var(--hint)}
+/* 三个统计一律不折行，挤不下就让字自己缩 */
+.hl-trend .st3 b{display:block;font-size:16px;font-weight:700;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.hl-trend .st3 b.big{font-size:19px;font-weight:800;animation:hl-rise .4s var(--e-out) both}
+/* 「最近一觉」装的是 01:52→09:21 这种，比另外两格长一倍：多分一点宽，字小一档 */
+.hl-trend .st3 div.wide{flex:1.45}
+.hl-trend .st3 b.big.wide{font-size:15.5px;letter-spacing:-.02em}
+.hl-trend .insight{font-size:13.5px;line-height:1.65;margin:6px 0 2px;text-wrap:pretty}
+
+/* 睡眠节律：一天一根，从躺下那一头往下长 */
+.hl-trend .rh{position:relative;margin-top:8px}
+.hl-trend .rh .gt{position:absolute;left:0;width:10.2%;text-align:right;
+  transform:translateY(-50%);font-size:9px;letter-spacing:.5px;color:var(--hint);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+.hl-trend .rh .from{position:absolute;left:10.9%;bottom:0;font-size:9px;
+  letter-spacing:.5px;color:var(--hint);white-space:nowrap}
+.hl-trend .rh .gl{stroke:var(--line);stroke-width:1}
+.hl-trend .rh .slpbar{transform-box:fill-box;transform-origin:top;
+  animation:hl-grow .5s var(--spring-soft) both}
+.hl-trend .rh .avg{stroke:var(--maple);stroke-width:1.6;stroke-dasharray:4 3;
+  transform-box:fill-box;transform-origin:left;animation:hl-sweep .7s var(--e-out) .3s both}
+
+/* 这一刻：三格 */
+.hl-trend .spot{display:flex;gap:8px}
+.hl-trend .spot div{flex:1;background:var(--card2,#faf7f1);border-radius:12px;padding:11px 10px 10px}
+.hl-trend .spot s{display:block;text-decoration:none;font-size:10.5px;letter-spacing:.15em;color:var(--hint)}
+.hl-trend .spot b{display:block;font-size:24px;font-weight:800;letter-spacing:-.04em;
+  font-variant-numeric:tabular-nums;line-height:1.15;animation:hl-rise .4s var(--e-out) both}
+.hl-trend .spot i{font-style:normal;display:block;font-size:11px;color:var(--sub)}
+
+/* 基本信息：不常驻，折叠在最下面。
+   ★ max-height + opacity —— display:none 没法做过渡。开的时候由 JS 按 scrollHeight 撑，
+     CSS 这儿只留 0 和一个够大的兜底。 */
+.hl-trend .infobox{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);
+  margin-top:11px;overflow:hidden}
+.hl-trend .infobox > button{width:100%;border:0;background:transparent;font-family:inherit;
+  color:var(--ink);text-align:left;display:flex;align-items:center;gap:10px;
+  padding:14px 16px;min-height:52px;cursor:pointer}
+.hl-trend .infobox > button:active{background:var(--card2,#faf7f1)}
+.hl-trend .infobox > button span{flex:1;min-width:0;font-size:14.5px;font-weight:600}
+.hl-trend .infobox > button svg{width:15px;height:15px;flex:none;stroke:var(--hint);
+  stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;
+  transition:transform .22s var(--spring-pop)}
+.hl-trend .infobox.open > button svg{transform:rotate(90deg)}
+.hl-trend .infowrap{overflow:hidden;max-height:0;opacity:0;
+  transition:max-height .22s var(--e-in), opacity .22s var(--e-in)}
+.hl-trend .infobox.open .infowrap{max-height:900px;opacity:1;
+  transition:max-height .3s var(--e-out), opacity .3s var(--e-out)}
+.hl-trend .infowrap > div{padding:2px 16px 16px}
+.hl-trend .bio{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hl-trend .bio label{display:block;min-width:0}
+.hl-trend .bio label > s{display:block;text-decoration:none;font-size:11px;
+  letter-spacing:.14em;color:var(--sub);margin-bottom:4px}
+.hl-trend .bio .fld{display:flex;align-items:center;gap:6px;background:var(--card2,#faf7f1);
+  border:1px solid var(--line);border-radius:11px;padding:0 11px}
+/* ★ 17px：输入框字号低于 16px，iOS 一聚焦就放大整页。★ 别用 font: 简写写 inherit，会把行高一起吃掉。 */
+.hl-trend .bio input{flex:1;min-width:0;border:0;background:transparent;
+  font-family:inherit;font-size:17px;font-weight:600;letter-spacing:-.02em;
+  padding:11px 0;color:var(--ink);outline:none;font-variant-numeric:tabular-nums;
+  -webkit-appearance:none}
+.hl-trend .bio .fld i{flex:none;font-style:normal;font-size:12px;color:var(--hint)}
+.hl-trend .derived{margin-top:13px;padding:11px 12px;background:var(--card2,#faf7f1);border-radius:12px}
+.hl-trend .derived s{display:block;text-decoration:none;font-size:10.5px;
+  letter-spacing:.17em;color:var(--sub);margin-bottom:5px}
+.hl-trend .derived p{display:flex;align-items:baseline;gap:8px;padding:3px 0;
+  font-size:13px;margin:0}
+.hl-trend .derived p span{flex:1;min-width:0;color:var(--sub)}
+.hl-trend .derived p b{flex:none;font-weight:700;font-variant-numeric:tabular-nums}
+.hl-trend .derived p em{width:104px;flex:none;text-align:right;font-style:normal;
+  font-size:11px;color:var(--hint)}
+.hl-trend .biosave{width:100%;margin-top:12px;
+  border:1px solid color-mix(in srgb, var(--maple) 38%, transparent);
+  background:transparent;color:var(--maple);border-radius:13px;padding:13px;min-height:46px;
+  font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;
+  transition:background .2s var(--e-out), transform .28s var(--spring-pop)}
+.hl-trend .biosave:active{transform:scale(.985)}
+.hl-trend .biosave.saved{background:var(--maple-soft,#f2e3dc)}
