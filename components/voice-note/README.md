@@ -159,5 +159,9 @@ VoiceNote.config({ shape: { d: 'M256 40 L470 470 L42 470 Z', cx: 256, cy: 320 } 
 
 ## 致谢
 
-- 长按菜单的图标：[Tabler Icons](https://tabler.io/icons)（MIT）
+- 长按菜单的图标：[Tabler Icons](https://tabler.io/icons)（MIT，Copyright © 2020-2024 Paweł Kuna）
 - simplex 噪声：Stefan Gustavson 的公开实现
+
+## 协议
+
+跟整个仓库一样：[AGPL-3.0](../../LICENSE)，商用可以另外授权，见 [COMMERCIAL.md](../../COMMERCIAL.md)。

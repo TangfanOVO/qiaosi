@@ -108,4 +108,4 @@ demo 页上的「玻璃」会套上隔壁的[液态玻璃](../liquid-glass)（�
 
 ## 许可
 
-MIT，外加一条：讨厌蔡依林不能拿（见仓库根目录的 [`LICENSE`](../../LICENSE)）。
+跟整个仓库一样：[AGPL-3.0](../../LICENSE)，商用可以另外授权，见 [COMMERCIAL.md](../../COMMERCIAL.md)。

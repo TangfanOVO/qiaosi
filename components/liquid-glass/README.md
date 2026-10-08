@@ -194,3 +194,7 @@ python3 -m http.server 8000
 | `liquid-core.js` | 本体：`<liquid-stage>` 自定义元素、着色器、弹簧和拖动 |
 | `demo.html` | 配方预览，带一排调参的滑杆 |
 | `wall-dark.jpg` / `wall-light.jpg` | 默认底图：月夜配黑玻璃，晨雾配白玻璃。代码画的，随便用 |
+
+## 协议
+
+跟整个仓库一样：[AGPL-3.0](../../LICENSE)，商用可以另外授权，见 [COMMERCIAL.md](../../COMMERCIAL.md)。

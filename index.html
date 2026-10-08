@@ -110,16 +110,16 @@ a{color:inherit}
   var ITEMS = [
     { id: 'windowsill', tab: '窗台', k: 'scene · three.js', path: 'scenes/windowsill', page: 'index.html',
       p: '一张靠窗的 3D 书桌。窗外是海和沙滩，柳条跟着风摆；天色跟着时间走，有风雨雪雷和四季。左右拖着看，点桌上的东西镜头推过去。全部用代码画，没有图片素材。',
-      d: [['依赖', 'three.js（CDN）'], ['协议', 'MIT']] },
+      d: [['依赖', 'three.js（CDN）'], ['协议', 'AGPL-3.0，商用可另外授权']] },
     { id: 'voice', tab: '语音条', k: 'component', path: 'components/voice-note', page: 'demo.html', ctl: 'voice',
       p: '聊天里的语音消息。点着播放；按住波形那条，它浮起来出菜单，「原文 / 中文」往下展开；点「演示」进全屏，图形跟着声音流动。',
-      d: [['依赖', '没有（玻璃皮要 liquid-core.js）'], ['皮肤', '纸 / 夜色 / 玻璃黑 / 玻璃白'], ['协议', 'MIT']] },
+      d: [['依赖', '没有（玻璃皮要 liquid-core.js）'], ['皮肤', '纸 / 夜色 / 玻璃黑 / 玻璃白'], ['协议', 'AGPL-3.0，商用可另外授权']] },
     { id: 'health', tab: '健康', k: 'page', path: 'components/health', page: 'demo.html', glass: true,
       p: '一页看完今天：四个大数、心情 24 小时、最近 14 天的走势。点任意一个大数进趋势页，曲线能点也能按住滑。只画，不接数据源。',
-      d: [['依赖', '没有'], ['数据', '演示里是固定种子编的 90 天'], ['协议', 'MIT']] },
+      d: [['依赖', '没有'], ['数据', '演示里是固定种子编的 90 天'], ['协议', 'AGPL-3.0，商用可另外授权']] },
     { id: 'glass', tab: '液态玻璃', k: 'plugin · WebGL2', path: 'components/liquid-glass', page: 'demo.html',
       p: '把标了 data-glass 的元素画成液态玻璃：背后的东西在边上被推弯，拖着会拉长，松手会弹回。一排滑杆就是配方，每拖一下都是显卡现算的。',
-      d: [['依赖', '没有，一个文件'], ['注意', '实时计算，画面一直在动的页面会一直算'], ['协议', 'MIT']], ctl: 'glass' }
+      d: [['依赖', '没有，一个文件'], ['注意', '实时计算，画面一直在动的页面会一直算'], ['协议', 'AGPL-3.0，商用可另外授权']], ctl: 'glass' }
   ];
   var tabs = document.querySelector('.tabs'), view = document.getElementById('view'), sw = document.getElementById('sw');
   var cur = null, glassOn = false;

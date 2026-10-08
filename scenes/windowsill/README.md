@@ -6,9 +6,6 @@
 
 ![一览](预览/00-一览.jpg)
 
-> **唯一的使用条件：你得喜欢蔡依林。**
-> 电脑屏幕上一直在放的那首是她的《电话皇后》，这是设计的一部分，请留着它。不喜欢她的，就不要用这个设计啦。（详见 [LICENSE](LICENSE)）
-
 ---
 
 ## 怎么打开
@@ -84,7 +81,6 @@ python3 -m http.server 8000
 ├── blender/            生成这些模型的 Python 脚本，和一个 .glb → .gltf.json 的小工具
 ├── 预览/               截图
 ├── CHANGELOG.md        每次更新改了什么
-└── LICENSE
 ```
 
 ### src/js 里每一段管什么
@@ -152,4 +148,4 @@ Blender 里只建了形状，材质只是几个名字（wood、back、gilt……
 
 ## 协议
 
-见 [LICENSE](LICENSE)：MIT，外加一条——你得喜欢蔡依林。
+跟整个仓库一样：[AGPL-3.0](../../LICENSE)，商用可以另外授权，见 [COMMERCIAL.md](../../COMMERCIAL.md)。
