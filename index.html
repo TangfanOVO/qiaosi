@@ -5,7 +5,7 @@
 <link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>巧思 · qiaosi</title>
-<meta name="description" content="一些拿来就能用的前端小东西：3D 窗台书桌、语音条、健康页、液态玻璃。">
+<meta name="description" content="一些拿来就能用的前端小东西：3D 窗台书桌、语音条、健康页。">
 <style>
 :root{--bg:#f1eee8;--card:#fffdf9;--ink:#2e2a26;--sub:#776f68;--hint:#9a918a;--line:rgba(46,42,38,.1);--on:#2e2a26;--on-ink:#f8f5f0}
 @media (prefers-color-scheme:dark){:root{--bg:#111318;--card:#1a1d24;--ink:#e9ecf1;--sub:#9aa3b0;--hint:#727b88;--line:rgba(255,255,255,.1);--on:#e9ecf1;--on-ink:#14161b}}
@@ -71,28 +71,9 @@ a{color:inherit}
     <div class="k" id="i-k"></div>
     <h2 id="i-t"></h2>
     <p id="i-p"></p>
-    <div class="glass" id="i-g" hidden>
-      <span>套上液态玻璃<br><small style="color:var(--hint)">实时计算的，手机会多费一点电</small></span>
-      <button type="button" class="sw" role="switch" aria-checked="false" aria-label="套上液态玻璃" id="sw"></button>
-    </div>
     <div class="ctl" id="i-v" hidden>
       <div class="h">皮肤</div><div class="seg" id="v-skin"></div>
       <div class="h">演示里的图形（按住波形 → 演示）</div><div class="seg" id="v-shape"></div>
-    </div>
-    <div class="ctl" id="i-c" hidden>
-      <div class="seg">
-        <button type="button" data-preset="old" aria-pressed="false">旧配方</button>
-        <button type="button" data-preset="new" aria-pressed="true">新配方</button>
-        <button type="button" id="c-bloom" aria-pressed="true">按下胀开</button>
-      </div>
-      <div class="seg">
-        <button type="button" data-tone="dark" aria-pressed="true">黑玻璃</button>
-        <button type="button" data-tone="light" aria-pressed="false">白玻璃</button>
-        <label>换底图<input type="file" accept="image/*" id="c-pick"></label>
-        <button type="button" id="c-reset">回到默认</button>
-      </div>
-      <div id="c-rows"></div>
-      <div class="m" id="c-m"></div>
     </div>
     <dl id="i-d"></dl>
     <div class="row">
@@ -113,21 +94,18 @@ a{color:inherit}
       d: [['依赖', 'three.js（CDN）'], ['协议', 'AGPL-3.0，商用可另外授权']] },
     { id: 'voice', tab: '语音条', k: 'component', path: 'components/voice-note', page: 'demo.html', ctl: 'voice',
       p: '聊天里的语音消息。点着播放；按住波形那条，它浮起来出菜单，「原文 / 中文」往下展开；点「演示」进全屏，图形跟着声音流动。',
-      d: [['依赖', '没有（玻璃皮要 liquid-core.js）'], ['皮肤', '纸 / 夜色 / 玻璃黑 / 玻璃白'], ['协议', 'AGPL-3.0，商用可另外授权']] },
-    { id: 'health', tab: '健康', k: 'page', path: 'components/health', page: 'demo.html', glass: true,
+      d: [['依赖', '没有'], ['皮肤', '纸 / 夜色'], ['协议', 'AGPL-3.0，商用可另外授权']] },
+    { id: 'health', tab: '健康', k: 'page', path: 'components/health', page: 'demo.html',
       p: '一页看完今天：四个大数、心情 24 小时、最近 14 天的走势。点任意一个大数进趋势页，曲线能点也能按住滑。只画，不接数据源。',
       d: [['依赖', '没有'], ['数据', '演示里是固定种子编的 90 天'], ['协议', 'AGPL-3.0，商用可另外授权']] },
-    { id: 'glass', tab: '液态玻璃', k: 'plugin · WebGL2', path: 'components/liquid-glass', page: 'demo.html',
-      p: '把标了 data-glass 的元素画成液态玻璃：背后的东西在边上被推弯，拖着会拉长，松手会弹回。一排滑杆就是配方，每拖一下都是显卡现算的。',
-      d: [['依赖', '没有，一个文件'], ['注意', '实时计算，画面一直在动的页面会一直算'], ['协议', 'AGPL-3.0，商用可另外授权']], ctl: 'glass' }
   ];
-  var tabs = document.querySelector('.tabs'), view = document.getElementById('view'), sw = document.getElementById('sw');
-  var cur = null, glassOn = false;
+  var tabs = document.querySelector('.tabs'), view = document.getElementById('view');
+  var cur = null;
   ITEMS.forEach(function (it) {
     var b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'tab'); b.textContent = it.tab; b.dataset.id = it.id;
     b.addEventListener('click', function () { show(it.id, true); }); tabs.appendChild(b); it.btn = b;
   });
-  function src(it, embed) { return it.path + '/' + it.page + (it.glass && glassOn ? '?glass=1' : embed && it.ctl ? '?embed=1' : ''); }
+  function src(it, embed) { return it.path + '/' + it.page + (embed && it.ctl ? '?embed=1' : ''); }
   function show(id, push) {
     var it = ITEMS.filter(function (x) { return x.id === id; })[0] || ITEMS[0]; cur = it;
     ITEMS.forEach(function (x) { x.btn.setAttribute('aria-selected', String(x === it)); });
@@ -135,40 +113,11 @@ a{color:inherit}
     document.getElementById('i-t').textContent = it.tab;
     document.getElementById('i-p').textContent = it.p;
     document.getElementById('i-d').innerHTML = it.d.map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>'; }).join('');
-    document.getElementById('i-g').hidden = !it.glass;
     document.getElementById('i-take').href = REPO + it.path;
     document.getElementById('i-open').href = src(it);
-    document.getElementById('i-c').hidden = it.ctl !== 'glass';
     document.getElementById('i-v').hidden = it.ctl !== 'voice';
     view.src = src(it, true);
     if (push) try { history.replaceState(null, '', '#' + it.id); } catch (e) {}
-  }
-  sw.addEventListener('click', function () {
-    glassOn = !glassOn; sw.setAttribute('aria-checked', String(glassOn));
-    if (cur && cur.glass) { view.src = src(cur); document.getElementById('i-open').href = src(cur); }
-  });
-
-  /* 液态玻璃那一格：配方的滑杆放在手机右边，直接调手机里那块画布（同一个站点，读得到它的 GLASS） */
-  var meterT = 0, lastD = 0;
-  function G() { try { return view.contentWindow && view.contentWindow.GLASS; } catch (e) { return null; } }
-  function toneBtns(t) { document.querySelectorAll('#i-c [data-tone]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-tone') === t)); }); }
-  function buildCtl() {
-    var g = G(), rows = document.getElementById('c-rows'); rows.innerHTML = '';
-    if (!g) return;
-    g.params.forEach(function (p, i) {
-      if (p.fresh && !(g.params[i - 1] || {}).fresh) { var h = document.createElement('div'); h.className = 'h'; h.textContent = '新配方的几味'; rows.appendChild(h); }
-      var r = document.createElement('div'); r.className = 'r';
-      r.innerHTML = '<label for="c-' + p.name + '">' + p.label + '</label><input type="range" id="c-' + p.name + '" min="' + p.min + '" max="' + p.max + '" step="' + p.step + '"><output></output>';
-      var inp = r.querySelector('input'), out = r.querySelector('output');
-      var show = function () { out.textContent = (+inp.value).toFixed(p.step < 0.01 ? 3 : p.step < 1 ? 2 : 0); };
-      inp.value = g.get(p.name); show();
-      inp.addEventListener('input', function () { var gg = G(); if (gg) gg.set(p.name, inp.value); show(); });
-      p.inp = inp; p.show = show; rows.appendChild(r);
-    });
-    toneBtns(g.tone());
-    var pr = g.preset();
-    document.querySelectorAll('#i-c [data-preset]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-preset') === pr)); });
-    document.getElementById('c-bloom').setAttribute('aria-pressed', String(g.bloom()));
   }
   /* 语音条那一格：皮肤和演示图形放在手机外面 */
   function buildVoice() {
@@ -186,25 +135,7 @@ a{color:inherit}
     });
   }
   view.addEventListener('load', function () {
-    clearInterval(meterT);
-    if (cur && cur.ctl === 'voice') { buildVoice(); return; }
-    if (!cur || cur.ctl !== 'glass') return;
-    buildCtl(); lastD = 0;
-    meterT = setInterval(function () {
-      var g = G(); if (!g) return; var d = g.drawn();
-      document.getElementById('c-m').textContent = '这一秒显卡重画了 ' + (d - lastD) + ' 帧' + (d - lastD ? '' : '（画面没变，停着省电）'); lastD = d;
-    }, 1000);
-  });
-  document.querySelectorAll('#i-c [data-tone]').forEach(function (b) {
-    b.addEventListener('click', function () { var g = G(); if (g) { g.tone(b.getAttribute('data-tone')); toneBtns(g.tone()); } });
-  });
-  document.querySelectorAll('#i-c [data-preset]').forEach(function (b) {
-    b.addEventListener('click', function () { var g = G(); if (g) { g.preset(b.getAttribute('data-preset')); buildCtl(); } });
-  });
-  document.getElementById('c-bloom').addEventListener('click', function () { var g = G(); if (g) { g.bloom(!g.bloom()); buildCtl(); } });
-  document.getElementById('c-reset').addEventListener('click', function () { var g = G(); if (g) { g.reset(); buildCtl(); } });
-  document.getElementById('c-pick').addEventListener('change', function (e) {
-    var f = e.target.files && e.target.files[0], g = G(); if (f && g) g.wall(URL.createObjectURL(f));
+    if (cur && cur.ctl === 'voice') buildVoice();
   });
   show((location.hash || '').slice(1), false);
 })();

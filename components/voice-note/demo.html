@@ -23,18 +23,6 @@
   --shadow:0 1px 2px rgba(0,0,0,.30), 0 8px 22px rgba(0,0,0,.32);
   --shadow-lift:0 2px 6px rgba(0,0,0,.34), 0 18px 40px rgba(0,0,0,.44);
 }
-:root[data-skin="liquid"]:not([data-glasstone="light"]){
-  --ink:#ffffff;--sub:rgba(255,255,255,.74);--hint:rgba(255,255,255,.52);--line:rgba(255,255,255,.14);
-  --card:rgba(12,17,24,.38);--card2:rgba(12,17,24,.24);--accent:rgba(255,255,255,.76);--accent-soft:rgba(255,255,255,.14);
-  --bg:#0f141b;
-}
-:root[data-skin="liquid"][data-glasstone="light"]{
-  --ink:#16191c;--sub:rgba(22,25,28,.72);--hint:rgba(22,25,28,.5);--line:rgba(22,25,28,.12);
-  --card:rgba(255,255,255,.34);--card2:rgba(255,255,255,.20);--accent:rgba(26,30,36,.62);--accent-soft:rgba(22,25,28,.09);
-  --bg:#eef0f3;
-}
-/* 玻璃画布真的在画时，把 [data-glass] 自己的底色剥掉，交给着色器画 */
-:root[data-skin="liquid"][data-liqgl="1"] [data-glass]{background:none!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 
 /* ── 预览台（桌面那一圈只是托着手机）── */
 *{box-sizing:border-box}
@@ -54,7 +42,7 @@ body{font-family:-apple-system,system-ui,"PingFang SC","Hiragino Sans GB",sans-s
 .phone{position:relative;width:390px;height:760px;max-width:100%;border-radius:40px;overflow:hidden;background:var(--bg);color:var(--ink);
   transform:translateZ(0);                      /* 演示页是 position:fixed —— 让它落在这台假手机里，不铺满整个浏览器 */
   box-shadow:0 0 0 1px rgba(127,127,127,.25), 0 30px 70px -30px rgba(0,0,0,.45)}
-/* 手机宽度：整页锁成一屏，两排按钮下面剩多少，手机就占多少 —— 滚的只有聊天，背景（画布）不动，玻璃才看得出在弯 */
+/* 手机宽度：整页锁成一屏，两排按钮下面剩多少，手机就占多少 —— 滚的只有聊天，背景不动 */
 @media (max-width:480px){ html,body{height:100%;overflow:hidden;overscroll-behavior:none} body{padding:0}
   .desk{gap:6px;height:100dvh;padding-top:6px} .skins,.shapes{flex:none} .hint{display:none}
   .phone{width:100vw;flex:1;min-height:0;height:auto;border-radius:0;box-shadow:none} }
@@ -64,23 +52,15 @@ body{font-family:-apple-system,system-ui,"PingFang SC","Hiragino Sans GB",sans-s
 .embed,.embed body{height:100%;overflow:hidden;overscroll-behavior:none}
 .embed body{padding:0}.embed .desk{gap:0;height:100dvh;padding:0}
 .embed .phone{width:100vw;flex:1;min-height:0;height:auto;border-radius:0;box-shadow:none}
-#liqstage{position:absolute;inset:0;display:block}
-:root:not([data-skin="liquid"]) #liqstage > canvas{display:none!important}
 .top{position:absolute;left:0;right:0;top:0;z-index:2;display:flex;align-items:center;justify-content:center;height:56px;
   font-size:14px;font-weight:600;letter-spacing:.06em;background:color-mix(in srgb,var(--bg) 72%,transparent);
   -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
-:root[data-skin="liquid"] .top{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;text-shadow:0 1px 2px rgba(0,0,0,.3)}
-:root[data-skin="liquid"][data-glasstone="light"] .top{text-shadow:none}
 .chat{position:absolute;inset:0;z-index:1;overflow-y:auto;padding:70px 16px 40px;font-size:14.5px;line-height:1.6;
   -webkit-overflow-scrolling:touch}
 .row{margin-bottom:12px}
 .msg{width:fit-content;max-width:82%;padding:11px 14px;border-radius:15px;border-bottom-left-radius:5px;background:var(--card);box-shadow:var(--shadow)}
 .row.me .msg{margin-left:auto;border-bottom-left-radius:15px;border-bottom-right-radius:5px;background:var(--accent);color:#fff}
-:root[data-theme="dark"]:not([data-skin="liquid"]) .row.me .msg{color:#2b2724}
-:root[data-skin="liquid"] .msg{border-radius:20px;background:var(--card);-webkit-backdrop-filter:blur(5px) saturate(1.2);backdrop-filter:blur(5px) saturate(1.2);box-shadow:none}
-:root[data-skin="liquid"] .row.me .msg{background:var(--card2);color:var(--ink)}
-/* 演示里一屏只有九块玻璃，文字泡也交给着色器画（一帧最多 14 块，聊天很长时请看 README 第 8 条） */
-:root[data-skin="liquid"][data-liqgl="1"] .msg[data-glass]{background:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+:root[data-theme="dark"] .row.me .msg{color:#2b2724}
 .time{font-size:11px;color:var(--hint);text-align:center;margin:6px 0 14px;letter-spacing:.04em}
 .toast{position:absolute;left:50%;bottom:28px;z-index:5;transform:translate(-50%,12px);opacity:0;pointer-events:none;
   padding:8px 14px;border-radius:999px;background:var(--ink);color:var(--bg);font-size:12.5px;transition:opacity .25s, transform .35s var(--spring-pop)}
@@ -93,8 +73,6 @@ body{font-family:-apple-system,system-ui,"PingFang SC","Hiragino Sans GB",sans-s
   <div class="skins" role="group" aria-label="皮肤">
     <button type="button" data-k="paper" aria-pressed="true">纸</button>
     <button type="button" data-k="night" aria-pressed="false">夜色</button>
-    <button type="button" data-k="glass-dark" aria-pressed="false">玻璃黑</button>
-    <button type="button" data-k="glass-light" aria-pressed="false">玻璃白</button>
   </div>
   <div class="shapes" role="group" aria-label="演示里的图形">
     <button type="button" data-s="star" aria-pressed="true">星星</button>
@@ -103,8 +81,6 @@ body{font-family:-apple-system,system-ui,"PingFang SC","Hiragino Sans GB",sans-s
     <button type="button" data-s="sprout" aria-pressed="false">嫩芽</button>
   </div>
   <div class="phone" id="phone">
-    <liquid-stage id="liqstage" hosts="[data-glass]" merge="0" light="132" shadow="0" frost-level="0.42" data-bg-y="0.28" bg-blur="0.03"
-      lobes="1" saturate="1.4" lift="0.05" disp-px="2" edge-adapt="1" phys="1" refract="2.8" bevel="1.3" bevel-max="28" soft-corner="1"></liquid-stage>
     <div class="top">语音</div>
     <div class="chat" id="chat" data-vn-scope></div>
     <div class="toast" id="toast" role="status"></div>
@@ -112,23 +88,18 @@ body{font-family:-apple-system,system-ui,"PingFang SC","Hiragino Sans GB",sans-s
   <p class="hint">点珠子或波形：播放 / 暂停。按住波形那条 0.6 秒：它浮起来，上面「原文 / 中文 | 演示」，下面是长按菜单。<br>预览里没有真声音，按估出来的时长走；接到应用里就是真的音频和真的响度。</p>
 </div>
 
-<script src="liquid-core.js"></script>
 <script src="voice-note.js"></script>
 <script>
 (function () {
   'use strict';
-  var root = document.documentElement, stage = document.getElementById('liqstage'), phone = document.getElementById('phone');
+  var root = document.documentElement;
   if (/[?&]embed=1/.test(location.search)) root.classList.add('embed');
   var toast = document.getElementById('toast'), tt = 0;
-  /* 玻璃皮的底图：月夜和晨雾两张山水，换成你自己的图也行 */
-  var WALL = { dark: 'wall-dark.jpg', light: 'wall-light.jpg' };
   function say(s) { toast.textContent = s; toast.classList.add('on'); clearTimeout(tt); tt = setTimeout(function () { toast.classList.remove('on'); }, 1600); }
 
   VoiceNote.config({
     container: function () { return document.getElementById('phone'); },
-    stage: function () { return stage; },
     blurToo: '.top',
-    wallpaper: function (tone) { return tone === 'dark' ? WALL.dark : WALL.light; },
     onAction: function (k) {
       say({ star: '收藏了', copy: '复制好了', quote: '引用：接到你自己的引用', multi: '多选：接到你自己的多选', redo: '重说：接到你自己的重说', hide: '藏起来了' }[k] || k);
     }
@@ -145,19 +116,19 @@ body{font-family:-apple-system,system-ui,"PingFang SC","Hiragino Sans GB",sans-s
   var V2 = { id: 'demo-b', time: '21:41', en: '「轻声」外面下雨了。「笑了一下」出门记得带伞。' };
   document.getElementById('chat').innerHTML =
     '<div class="time">今天 12:10</div>' +
-    '<div class="row me"><div class="msg" data-glass data-radius="20">今天好冷</div></div>' +
-    '<div class="row"><div class="msg" data-glass data-radius="20">降温了，出门把围巾带上。</div></div>' +
-    '<div class="row me"><div class="msg" data-glass data-radius="20">带了带了。中午吃什么</div></div>' +
-    '<div class="row"><div class="msg" data-glass data-radius="20">楼下那家面馆吧，热乎的。</div></div>' +
-    '<div class="row me"><div class="msg" data-glass data-radius="20">好，吃完回来找你</div></div>' +
-    '<div class="row"><div class="msg" data-glass data-radius="20">嗯，慢慢吃。</div></div>' +
+    '<div class="row me"><div class="msg">今天好冷</div></div>' +
+    '<div class="row"><div class="msg">降温了，出门把围巾带上。</div></div>' +
+    '<div class="row me"><div class="msg">带了带了。中午吃什么</div></div>' +
+    '<div class="row"><div class="msg">楼下那家面馆吧，热乎的。</div></div>' +
+    '<div class="row me"><div class="msg">好，吃完回来找你</div></div>' +
+    '<div class="row"><div class="msg">嗯，慢慢吃。</div></div>' +
     '<div class="time">今天 21:39</div>' +
-    '<div class="row me"><div class="msg" data-glass data-radius="20">发一条语音给我听听</div></div>' +
+    '<div class="row me"><div class="msg">发一条语音给我听听</div></div>' +
     '<div class="row">' + VoiceNote.html(V1) + '</div>' +
-    '<div class="row"><div class="msg" data-glass data-radius="20">发过去了，你听。</div></div>' +
-    '<div class="row me"><div class="msg" data-glass data-radius="20">听完了，再来一条</div></div>' +
+    '<div class="row"><div class="msg">发过去了，你听。</div></div>' +
+    '<div class="row me"><div class="msg">听完了，再来一条</div></div>' +
     '<div class="row">' + VoiceNote.html(V2) + '</div>' +
-    '<div class="row"><div class="msg" data-glass data-radius="20">嗯，路上慢点。</div></div>';
+    '<div class="row"><div class="msg">嗯，路上慢点。</div></div>';
 
   /* 打开时停在最底下（聊天都是从下往上看的）。等排好版再滚：嵌在 iframe 里时高度要到 load 以后才定 */
   (function () { var c = document.getElementById('chat'), go = function () { c.scrollTop = c.scrollHeight; };
@@ -174,37 +145,22 @@ body{font-family:-apple-system,system-ui,"PingFang SC","Hiragino Sans GB",sans-s
 
   var SK = {
     'paper':       { theme: 'light' },
-    'night':       { theme: 'dark' },
-    'glass-dark':  { skin: 'liquid', tone: 'dark', theme: 'dark' },
-    'glass-light': { skin: 'liquid', tone: 'light', theme: 'light' }
+    'night':       { theme: 'dark' }
   };
   function setSkin(k) {
     var s = SK[k]; if (!s) return;
     VoiceNote.stop();
-    if (s.skin) root.setAttribute('data-skin', s.skin); else root.removeAttribute('data-skin');
     root.setAttribute('data-theme', s.theme);
-    if (s.tone) {
-      root.setAttribute('data-glasstone', s.tone);
-      stage.setAttribute('tone', s.tone); stage.setAttribute('tint', s.tone === 'light' ? '0.10' : '0.22');
-      stage.setAttribute('frost-tint', s.tone === 'light' ? '0.52' : '0.34');
-      var w = s.tone === 'light' ? WALL.light : WALL.dark;
-      if (stage.setWallpaper) stage.setWallpaper(w); else stage.setAttribute('wallpaper', w);
-    } else root.removeAttribute('data-glasstone');
-    /* 玻璃皮才挂画布（跟应用里 liquid-attach 一样：别的皮下不在背后白画一张看不见的图） */
-    if (s.skin === 'liquid') { if (!stage.isConnected) phone.insertBefore(stage, phone.firstChild); }
-    else if (stage.isConnected) stage.remove();
     document.querySelectorAll('.skins button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-k') === k)); });
     try { localStorage.setItem('vnho.skin', k); } catch (e) {}
   }
   document.querySelectorAll('.skins button').forEach(function (b) { b.addEventListener('click', function () { setSkin(b.getAttribute('data-k')); }); });
-  stage.setAttribute('wallpaper', WALL.dark);
   var saved = null; try { saved = localStorage.getItem('vnho.skin'); } catch (e) {}
-  /* 从外面带 ?glass=1 进来：直接开玻璃黑 */
-  setSkin(/[?&]glass=1/.test(location.search) ? 'glass-dark' : SK[saved] ? saved : 'paper');
+  setSkin(SK[saved] ? saved : 'paper');
 
   /* 给外面用（仓库首页把皮肤和图形放在手机外面那张卡上） */
   window.VOICE = {
-    skins: [['paper', '纸'], ['night', '夜色'], ['glass-dark', '玻璃黑'], ['glass-light', '玻璃白']],
+    skins: [['paper', '纸'], ['night', '夜色']],
     shapes: [['star', '星星'], ['flower', '小花'], ['clover', '四叶草'], ['sprout', '嫩芽']],
     skin: function (k) { if (k) setSkin(k); var on = document.querySelector('.skins [aria-pressed="true"]'); return on && on.getAttribute('data-k'); },
     shape: function (k) { if (k) setShape(k); var on = document.querySelector('.shapes [aria-pressed="true"]'); return on && on.getAttribute('data-s'); }

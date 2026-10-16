@@ -104,8 +104,6 @@ var page = HealthPage(document.getElementById('health'), {
 `demo-data.js` 用固定种子现生成 90 天的步数、睡眠、心率、心情和周期，不对应任何真人。
 想看空态，demo 页上点「空的」。
 
-demo 页上的「玻璃」会套上隔壁的[液态玻璃](../liquid-glass)（要那个文件夹在旁边），开着玻璃时「亮 / 暗」切黑玻璃和白玻璃。health.css 一个字不用改，玻璃那几行都在 demo.html 里，可以照着接。
-
 ## 许可
 
 跟整个仓库一样：[AGPL-3.0](../../LICENSE)，商用可以另外授权，见 [COMMERCIAL.md](../../COMMERCIAL.md)。

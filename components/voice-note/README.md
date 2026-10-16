@@ -4,9 +4,9 @@
 
 点「演示」会进全屏：中间一个点和线连成的图形跟着声音流动，下面是逐字渐显的字幕，控件过两三秒自己退下去，方便录屏。
 
-![语音条：玻璃黑、玻璃白、夜色](preview.jpg)
+![语音条：纸、夜色](preview.jpg)
 
-纯原生 JS ＋ CSS，没有依赖。玻璃皮要加一份 `liquid-core.js`（WebGL2 液态玻璃），其他皮不用。
+纯原生 JS ＋ CSS，没有依赖。
 
 ## 怎么打开
 
@@ -16,13 +16,12 @@ python3 -m http.server 8000
 # 打开 http://localhost:8000/demo.html
 ```
 
-上面一排切皮肤（纸 / 夜色 / 玻璃黑 / 玻璃白），第二排切演示里的图形。演示页里没有真声音，按估出来的时长走。
+上面一排切皮肤（纸 / 夜色），第二排切演示里的图形。演示页里没有真声音，按估出来的时长走。
 
 ## 装进你的页面
 
 ```html
 <link rel="stylesheet" href="voice-note.css">
-<script src="liquid-core.js"></script>   <!-- 只有玻璃皮要 -->
 <script src="voice-note.js"></script>
 ```
 
@@ -57,13 +56,12 @@ list.innerHTML += VoiceNote.html({
 
 `--bg` `--card` `--card2` `--ink` `--sub` `--hint` `--line` `--accent` `--accent-soft` `--shadow` `--shadow-lift`
 
-`demo.html` 开头有四套现成的值（纸、夜色、玻璃黑、玻璃白），照抄或者换成你自己的。皮肤靠 `<html>` 上的属性切：
+`demo.html` 开头有两套现成的值（纸、夜色），照抄或者换成你自己的。皮肤靠 `<html>` 上的属性切：
 
 | 属性 | 值 |
 |---|---|
 | `data-theme` | `light` / `dark` |
-| `data-skin` | 不写＝纸；`liquid` 玻璃。其他皮也行：图形的颜色会从你的 `--ink` / `--hint` / `--accent` 现算 |
-| `data-glasstone` | 玻璃皮才用：`dark` / `light` |
+| `data-skin` | 不写＝纸。其他皮也行：图形的颜色会从你的 `--ink` / `--hint` / `--accent` 现算 |
 
 ## `VoiceNote.config({...})`
 
@@ -76,8 +74,6 @@ list.innerHTML += VoiceNote.html({
 | `title` / `sub(d)` | `'语音'` / `语音 · 时间` | 演示页顶上那两行 |
 | `scope(el)` | 最近的 `[data-vn-scope]`，没有就最近的滚动容器 | 浮起来时哪些东西要变糊 |
 | `blurToo` | `''` | 还要一起糊的选择器，比如顶栏、输入框 |
-| `stage()` | 页面上那块 `<liquid-stage>` | 玻璃皮用。全屏演示里那块画布的配方（`lobes`、`saturate`…）照抄它的 |
-| `wallpaper(tone)` | 跟 `stage()` 同一张 | 演示页玻璃皮的底图 |
 | `container()` | `body` | 演示页挂在哪 |
 | `zIndex` | `9000` | 演示页的层级 |
 
@@ -108,7 +104,7 @@ VoiceNote.config({ shape: { d: 'M256 40 L470 470 L42 470 Z', cx: 256, cy: 320 } 
 |---|---|
 | 波形 | 不跳。静止的形状就是这条语音每一段有多响，播放时只有一道进度从左往右扫过去 |
 | 长按 | 只有波形那条浮起来，珠子和下面的字原地不动。背后是糊，不压暗 |
-| 纸和玻璃 | 纸那一族是一个气泡（珠子和波形在一条里）；玻璃皮是两块（珠子＋胶囊） |
+| 一个气泡 | 珠子和波形在同一条里 |
 | 神态 | 「」和 [ ] 里的字界面上一律不显示，送去合成的仍然是带神态的原文 |
 | 图形整体 | 不放大缩小。动的只有里面：随机的、从里往外的渐隐渐显，像水 |
 | 流速 | 跟着声音有快有慢，说得越满，流到的那片越大 |
@@ -124,7 +120,7 @@ VoiceNote.config({ shape: { d: 'M256 40 L470 470 L42 470 Z', cx: 256, cy: 320 } 
 | 按住陷下去 | scale 0.955，弹簧 response 0.6 / damping 1 | `drive()` |
 | 浮起 | scale 1.05，response 0.42 / damping 0.62（带一点回弹） | `openMenu()` |
 | 放回 | scale 1，response 0.34 / damping 1（不过冲） | `closeMenu()` |
-| 背后退远 | blur 4.5px、opacity .58，进 .34s / 出 .24s；玻璃皮的地面再糊 0.30 | `.vn-focus` / `groundTo()` |
+| 背后退远 | blur 4.5px、opacity .58，进 .34s / 出 .24s | `.vn-focus` / `groundTo()` |
 | 字往下撑开 | 开：高度 0 → 全高 .32s；换段落：滑到新高度（变矮 .22s）；收：一下收 | `unfold()` |
 | 静止波形 | 31 根；每段 0.25×峰值 ＋ 0.75×RMS；高度 0.07 ＋ 0.93×v^1.8 | `peaksFrom()` |
 | 撒点 | 512² 里抖动网格 7.4px | `buildLeaf()` |
@@ -144,8 +140,6 @@ VoiceNote.config({ shape: { d: 'M256 40 L470 470 L42 470 Z', cx: 256, cy: 320 } 
 4. **iOS 只认手势里的第一次 `play()`。** 要现合成的那条，点下去先拿一段静音把 `<audio>` 解锁，合成回来再放。
 5. **`audio.src` 读回来是绝对地址**，跟相对地址比永远不等，会每次重载。播放器自己记一份地址。
 6. **老 Safari 的 `decodeAudioData` 只认回调写法。** 已经包好了。
-7. **演示页的玻璃用 `data-vn-glass`。** 写成 `data-glass` 会被页面那块大画布也算进去，白占一帧最多 14 块的玻璃名额。
-8. **同屏语音条很多时**，每条占 2 块玻璃（字开着再 +1）。超出 14 块的那几条会没有玻璃，把远处的降成 CSS 料（`data-nogl`），别去加上限。
 
 ## 文件
 
@@ -153,9 +147,7 @@ VoiceNote.config({ shape: { d: 'M256 40 L470 470 L42 470 Z', cx: 256, cy: 320 } 
 |---|---|
 | `voice-note.js` | 本体，对外只有 `window.VoiceNote` |
 | `voice-note.css` | 样式 |
-| `liquid-core.js` | 液态玻璃（WebGL2），玻璃皮才要 |
 | `demo.html` | 演示页 |
-| `wall-dark.jpg` / `wall-light.jpg` | 玻璃皮的两张底图（月夜、晨雾），代码画的 |
 
 ## 致谢
 
